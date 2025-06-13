@@ -1,25 +1,16 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Home from '../pages/Home'
-import Login from '../pages/Login'
-import AppLayout from '../layouts/AppLayout'
-import PrivateRoute from './PrivateRoute'
+// src/routes/AppRouter.tsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import PrivateRoute from './PrivateRoute';
+import Login from '../pages/Login';
+import Dashboard from '../pages/Dashboard';
 
-export default function AppRouter() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route
-                    path="/"
-                    element={
-                        <PrivateRoute>
-                            <AppLayout>
-                                <Home />
-                            </AppLayout>
-                        </PrivateRoute>
-                    }
-                />
-            </Routes>
-        </BrowserRouter>
-    )
-}
+const AppRouter = () => (
+    <BrowserRouter>
+        <Routes>
+            <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/login" element={<Login />} />
+        </Routes>
+    </BrowserRouter>
+);
+
+export default AppRouter;
