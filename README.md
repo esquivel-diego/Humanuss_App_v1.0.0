@@ -1,54 +1,127 @@
-# React + TypeScript + Vite
+# 🧠 Humanuss App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Humanuss** es una aplicación web modular y escalable para la gestión del recurso humano, diseñada como una extensión de una plataforma principal conectada exclusivamente por API. Permite a empresas gestionar asistencia, nómina, solicitudes y comunicación con sus colaboradores de forma intuitiva y personalizable.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Tecnologías utilizadas
 
-## Expanding the ESLint configuration
+- **React + Vite + TypeScript** – Frontend moderno, veloz y tipado
+- **Zustand** – Estado global simple y eficiente
+- **TailwindCSS** – Utilidades de estilo modernas con dark mode integrado
+- **React Router DOM** – Navegación por rutas protegidas
+- **LocalStorage** – Persistencia de sesión e interacciones
+- **PostCSS & Autoprefixer** – Procesamiento CSS
+- **Vercel** (futuro) – Deploy continuo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 📁 Estructura del proyecto
+
+```txt
+src/
+├── assets/                # Imágenes, íconos, logos
+├── components/            # Componentes reutilizables (ej. MoodModal)
+├── layouts/               # Layouts generales como AppLayout
+├── pages/                 # Vistas: Login, Home, Dashboard, etc.
+├── routes/                # AppRouter y rutas protegidas
+├── store/                 # Zustand stores: auth, mood, etc.
+├── types/                 # Tipados globales
+├── utils/                 # Funciones auxiliares reutilizables
+├── index.css              # Estilos globales
+├── main.tsx               # Entry point: carga tema y estado inicial
+├── App.tsx                # AppRouter principal
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🧪 Instalación y uso
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/esquivel-diego/humanuss.git
+cd humanuss
 ```
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 3. Ejecutar en entorno local
+
+```bash
+npm run dev
+```
+
+Abre el navegador en [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 🔐 Funcionalidades implementadas
+
+- ✅ Login simulado con persistencia (`localStorage`)
+- ✅ Rutas protegidas (`<PrivateRoute />`)
+- ✅ Logout funcional con redirección
+- ✅ Dark mode con persistencia
+- ✅ Modal diario de estado de ánimo (único por día)
+
+---
+
+## 📦 Roadmap de desarrollo (MVP)
+
+| Fase | Descripción                            | Estado  |
+|------|----------------------------------------|---------|
+| 0    | Setup, Tailwind, estructura inicial    | ✅      |
+| 1    | Login + Mood modal + rutas protegidas  | ✅      |
+| 2    | Dashboard con 5 cards dinámicas        | 🔜      |
+| 3    | Formulario de solicitudes RRHH         | 🔜      |
+| 4    | Perfil colaborador + organigrama       | 🔜      |
+| 5    | Funciones de administrador             | 🔜      |
+| 6    | Notificaciones simuladas               | 🔜      |
+
+---
+
+## 🧑‍💻 Contribución
+
+1. Crea una nueva rama desde `main`:
+   ```bash
+   git checkout -b feat/nombre-funcionalidad
+   ```
+
+2. Asegúrate de usar commits semánticos:
+   ```bash
+   git commit -m "feat: add dashboard card for attendance"
+   ```
+
+3. Crea un PR con descripción clara del cambio
+
+---
+
+## 📎 Notas adicionales
+
+- Todos los componentes deben estar **comentados profesionalmente**
+- Se sigue el enfoque **mobile-first** con adaptaciones progresivas
+- Estado global manejado 100% con **Zustand**
+- Modal de estado de ánimo se controla por **fecha en localStorage**
+- Toda la lógica de sesión es independiente de backend (por ahora)
+
+---
+
+## 📤 Deploy (en preparación)
+
+Este proyecto será desplegado en Vercel.  
+El comando de build será:
+
+```bash
+npm run build
+```
+
+---
+
+## 🧑 Autor
+
+Desarrollado por Diego Esquivel
+[esquivel-diego](https://github.com/esquivel-diego)
