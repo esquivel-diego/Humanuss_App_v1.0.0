@@ -30,7 +30,8 @@
       "@pages/*": ["pages/*"],
       "@layouts/*": ["layouts/*"],
       "@store/*": ["store/*"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@mocks/*": ["mocks/*"]
     }
   },
   "include": ["src"]

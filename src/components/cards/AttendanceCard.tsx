@@ -1,10 +1,22 @@
-// src/components/cards/AttendanceCard.tsx
-/**
- * Card que muestra una tabla de asistencia semanal.
- * En el futuro puede incluir una gráfica con una librería.
- */
+// @components/cards/AttendanceCard.tsx
+
+import { useEffect, useState } from 'react';
+import data from '@mocks/attendance.json';
+
+interface DayRecord {
+    day: string;
+    checkIn: string;
+    checkOut: string;
+}
 
 const AttendanceCard = () => {
+    const [weekData, setWeekData] = useState<DayRecord[]>([]);
+
+    useEffect(() => {
+        // Simula fetch local
+        setWeekData(data.week);
+    }, []);
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
             <h2 className="text-xl font-semibold mb-2">Asistencia Semanal</h2>
@@ -17,21 +29,13 @@ const AttendanceCard = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Lunes</td>
-                        <td>08:00</td>
-                        <td>17:00</td>
-                    </tr>
-                    <tr>
-                        <td>Martes</td>
-                        <td>08:15</td>
-                        <td>17:05</td>
-                    </tr>
-                    <tr>
-                        <td>Miércoles</td>
-                        <td>08:05</td>
-                        <td>17:00</td>
-                    </tr>
+                    {weekData.map((d, i) => (
+                        <tr key={i}>
+                            <td>{d.day}</td>
+                            <td>{d.checkIn}</td>
+                            <td>{d.checkOut}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>

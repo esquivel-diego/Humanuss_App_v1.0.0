@@ -1,0 +1,13 @@
+{
+    "employee": "Diego Esquivel",
+    "payments": [
+        {
+            "amount": 8000,
+            "date": "2025-05-31"
+        },
+        {
+            "amount": 8000,
+            "date": "2025-04-30"
+        }
+    ]
+}

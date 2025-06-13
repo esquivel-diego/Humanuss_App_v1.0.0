@@ -1,0 +1,15 @@
+{
+    "availableDays": 12,
+    "requests": [
+        {
+            "date": "2025-06-03",
+            "type": "Vacación",
+            "status": "Aprobado"
+        },
+        {
+            "date": "2025-05-20",
+            "type": "Permiso",
+            "status": "Pendiente"
+        }
+    ]
+}

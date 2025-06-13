@@ -1,15 +1,29 @@
-// src/components/cards/DaysCard.tsx
-/**
- * Card que muestra los días disponibles de vacaciones o permisos,
- * y una tabla simulada de solicitudes recientes.
- */
+// @components/cards/DaysCard.tsx
+
+import { useEffect, useState } from 'react';
+import data from '@mocks/days.json';
+
+interface Request {
+    date: string;
+    type: string;
+    status: string;
+}
 
 const DaysCard = () => {
+    const [availableDays, setAvailableDays] = useState<number>(0);
+    const [requests, setRequests] = useState<Request[]>([]);
+
+    useEffect(() => {
+        // Simulación de fetch local
+        setAvailableDays(data.availableDays);
+        setRequests(data.requests);
+    }, []);
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
             <h2 className="text-xl font-semibold mb-2">Días Disponibles</h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Tienes 12 días disponibles.
+                Tienes {availableDays} días disponibles.
             </p>
 
             <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
@@ -21,16 +35,15 @@ const DaysCard = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>2025-06-03</td>
-                        <td>Vacación</td>
-                        <td className="text-green-600">Aprobado</td>
-                    </tr>
-                    <tr>
-                        <td>2025-05-20</td>
-                        <td>Permiso</td>
-                        <td className="text-yellow-500">Pendiente</td>
-                    </tr>
+                    {requests.map((r, index) => (
+                        <tr key={index}>
+                            <td>{r.date}</td>
+                            <td>{r.type}</td>
+                            <td className={r.status === 'Aprobado' ? 'text-green-600' : 'text-yellow-500'}>
+                                {r.status}
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>

@@ -1,17 +1,29 @@
-// src/components/cards/PayrollCard.tsx
-/**
- * Card que muestra pagos recientes y permite descargar una boleta en PDF.
- * Simula la información de la nómina.
- */
+// @components/cards/PayrollCard.tsx
 
-import jsPDF from "jspdf";
+import { useEffect, useState } from 'react';
+import { jsPDF } from 'jspdf';
+import payrollData from '@mocks/payroll.json';
+
+interface Payment {
+    amount: number;
+    date: string;
+}
 
 const PayrollCard = () => {
+    const [employee, setEmployee] = useState('');
+    const [payments, setPayments] = useState<Payment[]>([]);
+
+    useEffect(() => {
+        // Simula fetch de datos
+        setEmployee(payrollData.employee);
+        setPayments(payrollData.payments);
+    }, []);
+
     const handleDownload = () => {
         const doc = new jsPDF();
         doc.text("Boleta de Pago", 20, 20);
-        doc.text("Empleado: Diego Esquivel", 20, 30);
-        doc.text("Sueldo: Q8,000", 20, 40);
+        doc.text(`Empleado: ${employee}`, 20, 30);
+        doc.text(`Sueldo: Q${payments[0].amount}`, 20, 40);
         doc.save("boleta_pago.pdf");
     };
 
@@ -19,8 +31,9 @@ const PayrollCard = () => {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
             <h2 className="text-xl font-semibold mb-2">Nómina</h2>
             <ul className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                <li>Pago: Q8,000 - 2025-05-31</li>
-                <li>Pago: Q8,000 - 2025-04-30</li>
+                {payments.map((p, index) => (
+                    <li key={index}>Pago: Q{p.amount} - {p.date}</li>
+                ))}
             </ul>
             <button
                 onClick={handleDownload}
