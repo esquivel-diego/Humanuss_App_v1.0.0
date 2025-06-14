@@ -3,6 +3,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import payrollData from "@mocks/payroll.json";
 
+const getBoletaUrl = (): string => {
+    // Temporal: boleta ficticia
+    return "/boletas/boleta-ejemplo.pdf";
+};
+
 const PayrollDetail = () => {
     const { index } = useParams();
     const navigate = useNavigate();
@@ -27,8 +32,14 @@ const PayrollDetail = () => {
     const formattedAmount = `Q${payment.amount.toLocaleString("es-GT", { minimumFractionDigits: 2 })}`;
 
     const handleDownload = () => {
-        alert("📄 La boleta se descargará aquí en el futuro.");
-        // En el futuro: lógica real para descargar archivo PDF o similar
+        const link = document.createElement("a");
+        link.href = getBoletaUrl();
+        link.download = `boleta-${payment.date}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        alert("📥 La descarga de la boleta ha comenzado.");
     };
 
     return (
@@ -65,3 +76,4 @@ const PayrollDetail = () => {
 };
 
 export default PayrollDetail;
+

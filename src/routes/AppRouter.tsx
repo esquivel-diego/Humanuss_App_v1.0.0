@@ -5,7 +5,7 @@ import Dashboard from '../pages/Dashboard';
 import AttendanceTable from '../pages/AttendanceTable';
 import DaysTable from '../pages/DaysTable';
 import PayrollTable from '../pages/PayrollTable';
-import PayrollDetail from '../pages/PayrollDetail'; // 🆕
+import PayrollDetail from '../pages/PayrollDetail'; 
 
 const AppRouter = () => (
     <BrowserRouter>
