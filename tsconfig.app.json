@@ -31,7 +31,8 @@
       "@layouts/*": ["layouts/*"],
       "@store/*": ["store/*"],
       "@utils/*": ["utils/*"],
-      "@mocks/*": ["mocks/*"]
+      "@mocks/*": ["mocks/*"],
+      "@services/*": ["services/*"]
     }
   },
   "include": ["src"]

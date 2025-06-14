@@ -1,6 +1,7 @@
 // @components/cards/DaysCard.tsx
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import data from '@mocks/days.json';
 
 interface Request {
@@ -12,40 +13,50 @@ interface Request {
 const DaysCard = () => {
     const [availableDays, setAvailableDays] = useState<number>(0);
     const [requests, setRequests] = useState<Request[]>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // Simulación de fetch local
         setAvailableDays(data.availableDays);
         setRequests(data.requests);
     }, []);
 
-    return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
-            <h2 className="text-xl font-semibold mb-2">Días Disponibles</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Tienes {availableDays} días disponibles.
-            </p>
+    const totalDays = 15;
+    const takenDays = totalDays - availableDays;
+    const lastStatus = requests[0]?.status || 'N/A';
 
-            <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200">
-                <thead className="text-xs uppercase text-gray-500 dark:text-gray-400">
-                    <tr>
-                        <th className="pb-2">Fecha</th>
-                        <th className="pb-2">Tipo</th>
-                        <th className="pb-2">Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {requests.map((r, index) => (
-                        <tr key={index}>
-                            <td>{r.date}</td>
-                            <td>{r.type}</td>
-                            <td className={r.status === 'Aprobado' ? 'text-green-600' : 'text-yellow-500'}>
-                                {r.status}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+    return (
+        <div
+            onClick={() => navigate("/days")}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
+        >
+            <h2 className="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase mb-4">
+                DÍAS DISPONIBLES
+            </h2>
+            <div className="flex justify-between items-center text-center">
+                <div>
+                    <p className="text-xs text-gray-500 uppercase">Tomados</p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-white">
+                        {takenDays.toString().padStart(2, '0')}
+                    </p>
+                </div>
+                <div>
+                    <p className="text-xs text-gray-500 uppercase">Disponibles</p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-white">
+                        {availableDays.toString().padStart(2, '0')}
+                    </p>
+                </div>
+                <div>
+                    <p className="text-xs text-gray-500 uppercase">Estatus última solicitud</p>
+                    <p
+                        className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${lastStatus === 'Aprobado' || lastStatus === 'Approved'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}
+                    >
+                        {lastStatus.toUpperCase()}
+                    </p>
+                </div>
+            </div>
         </div>
     );
 };
