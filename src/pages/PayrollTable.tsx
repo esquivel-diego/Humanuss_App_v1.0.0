@@ -1,6 +1,7 @@
 // src/pages/PayrollTable.tsx
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import data from "@mocks/payroll.json";
 
 interface Payment {
@@ -18,6 +19,7 @@ const formatMonth = (dateStr: string) => {
 
 const PayrollTable = () => {
     const [payments, setPayments] = useState<Payment[]>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         setPayments(data.payments);
@@ -40,7 +42,11 @@ const PayrollTable = () => {
                         {payments.map((payment, i) => {
                             const { month, year, quincena } = formatMonth(payment.date);
                             return (
-                                <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                <tr
+                                    key={i}
+                                    onClick={() => navigate(`/payroll/${i}`)}
+                                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                >
                                     <td className="px-6 py-4 text-sm">{month}</td>
                                     <td className="px-6 py-4 text-sm">{quincena}</td>
                                     <td className="px-6 py-4 text-sm">{year}</td>
