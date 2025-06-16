@@ -32,7 +32,8 @@
       "@store/*": ["store/*"],
       "@utils/*": ["utils/*"],
       "@mocks/*": ["mocks/*"],
-      "@services/*": ["services/*"]
+      "@services/*": ["services/*"],
+      "@hooks/*": ["hooks/*"]
     }
   },
   "include": ["src"]

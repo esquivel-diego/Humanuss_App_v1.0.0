@@ -8,7 +8,11 @@ import PayrollTable from '../pages/PayrollTable'
 import PayrollDetail from '../pages/PayrollDetail'
 import Settings from '../pages/Settings'
 import AppLayout from '../layouts/AppLayout'
-import Modules from '../pages/Modules'
+import Profile from '../pages/Profile'
+import LeaveRequest from '../pages/modules/LeaveRequest'
+import Absences from '../pages/modules/Absences'
+import HRRequests from '../pages/modules/HRRequests'
+import News from '../pages/modules/News'
 
 
 const AppRouter = () => (
@@ -32,8 +36,11 @@ const AppRouter = () => (
                 <Route path="/payroll/:index" element={<PayrollDetail />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/modules" element={<Modules />} />
-
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/modules/vacaciones" element={<LeaveRequest />} />
+                <Route path="/modules/ausencias" element={<Absences />} />
+                <Route path="/modules/solicitudes" element={<HRRequests />} />
+                <Route path="/modules/novedades" element={<News />} />
             </Route>
 
         </Routes>
