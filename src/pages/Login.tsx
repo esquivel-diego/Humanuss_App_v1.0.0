@@ -1,6 +1,8 @@
 import { useAuthStore } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
+
 
 export default function Login() {
   const login = useAuthStore((state) => state.login)
@@ -45,12 +47,13 @@ export default function Login() {
             className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
           />
           <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-600 dark:text-gray-300"
-          >
-            {showPassword ? '🙈' : '👁️'}
-          </button>
+  type="button"
+  onClick={() => setShowPassword(!showPassword)}
+  className="absolute inset-y-0 right-3 flex items-center text-gray-600 dark:text-gray-300"
+>
+  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+</button>
+
         </div>
 
         {/* Botón INGRESAR */}
