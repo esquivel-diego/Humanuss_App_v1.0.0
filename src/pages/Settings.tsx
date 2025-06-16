@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { useTheme } from '@hooks/useTheme'
+import ChangePasswordModal from '@components/modals/ChangePasswordModal'
 
 const Settings = () => {
   const { theme, toggleTheme } = useTheme()
+  const [modalOpen, setModalOpen] = useState(false)
 
   const user = {
     name: 'Diego Esquivel',
@@ -27,12 +30,15 @@ const Settings = () => {
       </div>
 
       {/* Cambiar contraseña */}
-      <button className="w-full flex justify-between items-center px-4 py-3 bg-white dark:bg-gray-800 rounded-xl shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+      <button
+        onClick={() => setModalOpen(true)}
+        className="w-full flex justify-between items-center px-4 py-3 bg-white dark:bg-gray-800 rounded-xl shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+      >
         <span className="text-sm font-medium">Cambiar contraseña</span>
         <span className="text-xl">›</span>
       </button>
 
-      {/* Toggle modo oscuro */}
+      {/* Modo oscuro */}
       <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-gray-800 rounded-xl shadow">
         <span className="text-sm font-medium">Dark mode</span>
         <label className="inline-flex items-center cursor-pointer">
@@ -51,6 +57,9 @@ const Settings = () => {
           </div>
         </label>
       </div>
+
+      {/* Modal */}
+      <ChangePasswordModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   )
 }

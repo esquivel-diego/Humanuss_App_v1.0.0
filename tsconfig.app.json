@@ -33,7 +33,8 @@
       "@utils/*": ["utils/*"],
       "@mocks/*": ["mocks/*"],
       "@services/*": ["services/*"],
-      "@hooks/*": ["hooks/*"]
+      "@hooks/*": ["hooks/*"],
+      "@styles/*": ["styles/*"]
     }
   },
   "include": ["src"]
