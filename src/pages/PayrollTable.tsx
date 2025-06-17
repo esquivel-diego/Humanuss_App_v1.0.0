@@ -27,7 +27,10 @@ const PayrollTable = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6">
-            <h1 className="text-2xl font-bold mb-6">Boletas de Pago</h1>
+            <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow mb-6">
+                Nómina y Pagos
+            </div>
+
             <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-2xl">
                 <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-100 dark:bg-gray-700 text-left">
