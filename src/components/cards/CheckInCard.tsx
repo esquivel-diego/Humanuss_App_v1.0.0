@@ -11,9 +11,7 @@ const CheckInCard = () => {
     const m = date.getMinutes();
     const hour = h % 12 || 12;
     const meridian = h < 12 ? "A.M" : "P.M";
-    return `${hour.toString().padStart(2, "0")}:${m
-      .toString()
-      .padStart(2, "0")} ${meridian}`;
+    return `${hour.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")} ${meridian}`;
   };
 
   const checkStatus = (t: string | null) => {
@@ -45,16 +43,17 @@ const CheckInCard = () => {
   return (
     <div
       onClick={handleCheckIn}
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition flex flex-col justify-between h-32 w-full"
+      style={{ backgroundColor: "rgba(0,123,255,0.08)" }}
+      className="rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition flex flex-col items-center justify-center h-32 w-full"
     >
-      <div className="flex items-center justify-between text-xs text-black dark:text-white font-semibold">
-        CHECK-IN
-        <ArrowUpRight size={14} />
+      <div className="flex items-center justify-between w-full text-xs text-black dark:text-white font-semibold">
+        <span>CHECK-IN</span>
+        <ArrowUpRight size={16} className="text-gray-400 hover:text-blue-500 transition" />
       </div>
-      <div className="text-2xl font-bold text-black dark:text-white">
+      <div className="text-2xl font-bold text-black dark:text-white mt-2">
         {time ? time : "--:--"}
       </div>
-      <div className="text-xs text-center text-gray-500 dark:text-gray-400 tracking-wide uppercase">
+      <div className="text-xs text-center text-gray-500 dark:text-gray-400 tracking-wide uppercase mt-1">
         {checkStatus(time)}
       </div>
     </div>
