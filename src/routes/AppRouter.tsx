@@ -13,6 +13,8 @@ import LeaveRequest from '../pages/modules/LeaveRequest'
 import Absences from '../pages/modules/Absences'
 import HRRequests from '../pages/modules/HRRequests'
 import News from '../pages/modules/News'
+import NewsDetail from '../pages/modules/NewsDetail'
+
 
 
 const AppRouter = () => (
@@ -41,6 +43,7 @@ const AppRouter = () => (
                 <Route path="/modules/ausencias" element={<Absences />} />
                 <Route path="/modules/solicitudes" element={<HRRequests />} />
                 <Route path="/modules/novedades" element={<News />} />
+                <Route path="/novedades/:id" element={<NewsDetail />} />
             </Route>
 
         </Routes>
