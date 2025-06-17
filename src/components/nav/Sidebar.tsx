@@ -1,10 +1,10 @@
-import React from 'react'
-import { useLocation, Link } from 'react-router-dom'
+import React, { useLayoutEffect, useState } from 'react'
+import { useLocation, Link, useNavigate } from 'react-router-dom'
 import {
   Moon, Sun, Menu, LayoutDashboard, Settings, Boxes,
-  Plane, CalendarX, FileText, Megaphone, ArrowLeft
+  Plane, CalendarX, FileText, Megaphone, ArrowLeft, LogOut
 } from 'lucide-react'
-import { useState, useLayoutEffect } from 'react'
+import { useAuthStore } from '../../store/authStore'
 import { cn } from '@utils/cn'
 
 type MenuItem = {
@@ -17,10 +17,17 @@ type MenuItem = {
 
 const Sidebar = () => {
   const location = useLocation()
+  const navigate = useNavigate()
+  const logout = useAuthStore((state) => state.logout)
 
   const [collapsed, setCollapsed] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('light')
   const [activeMenu, setActiveMenu] = useState<'main' | 'modules'>('main')
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
 
   useLayoutEffect(() => {
     const storedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null
@@ -111,9 +118,18 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      {/* Separador + modo oscuro */}
+      {/* Tema + cerrar sesión */}
       <div className="px-2 py-4 flex flex-col gap-2">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+        >
+          <LogOut size={18} />
+          {!collapsed && <span>Cerrar sesión</span>}
+        </button>
+
         <hr className="border-t border-gray-200 dark:border-gray-700 mb-2" />
+
         <button
           onClick={toggleTheme}
           className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
