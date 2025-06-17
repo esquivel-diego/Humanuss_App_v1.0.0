@@ -7,6 +7,11 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // ✅ Nuevos breakpoints personalizados
+      screens: {
+        midlg: '1000px',
+        xlgrid: '1200px' // 👈 nuevo breakpoint para layout del dashboard
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -71,7 +76,7 @@ module.exports = {
     }
   },
   plugins: [
-    require("tailwindcss-animate"),
-    require("@tailwindcss/line-clamp") // 👈 aquí se agregó el plugin
+    require('tailwindcss-animate'),
+    require('@tailwindcss/line-clamp')
   ]
 }
