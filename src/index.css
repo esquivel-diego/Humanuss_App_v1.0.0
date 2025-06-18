@@ -2,15 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
-
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Modo claro */
+    --background: linear-gradient(to bottom, #bec4d9 0%, #92a1c3 100%);
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -36,8 +37,10 @@ html, body, #root {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
-    --background: 240 10% 3.9%;
+    /* Modo oscuro */
+    --background: #0f172a; /* Azul oscuro exacto */
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -62,15 +65,31 @@ html, body, #root {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-
-
-@layer base {
   * {
     @apply border-border;
   }
+
+  html,
   body {
-    @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply text-foreground;
+    background: var(--background); /* Aplica gradiente o azul según tema */
   }
 }
+
+@layer components {
+  .sidebar-bg {
+    background: linear-gradient(to bottom, #BEC4D9, #92A1C3); /* Claro */
+  }
+
+  .dark .sidebar-bg {
+    background-color: #0f172a; /* Oscuro exacto */
+  }
+}
+
