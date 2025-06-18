@@ -76,7 +76,7 @@ const AttendanceCard = () => {
     return (
         <div
             onClick={() => navigate("/attendance")}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow px-8 py-6 flex flex-col gap-8 cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
+            className="card-bg rounded-2xl shadow px-8 py-6 flex flex-col gap-8 cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
         >
             <h2 className="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase text-center w-full">
                 Asistencia semanal

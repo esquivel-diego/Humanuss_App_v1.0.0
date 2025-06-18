@@ -25,10 +25,10 @@ const LeaveRequest = () => {
   }
 
   return (
-    <div className="h-full bg-gradient-to-br from-slate-100 to-slate-300 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white">
-      <div className="w-full max-w-5xl mx-auto h-full flex flex-col">
+    <div className="h-full rounded-2xl bg-gradient-to-br from-slate-100 to-slate-300 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white">
+      <div className="w-full max-w-5xl mx-auto h-full flex flex-col justify-center">
         {/* Card contenedor */}
-        <div className="flex flex-col flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+        <div className="card-bg flex flex-col flex-1 rounded-2xl shadow-xl p-6 pt-10">
           {/* Título */}
           <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow text-center">
             Solicitud de vacaciones

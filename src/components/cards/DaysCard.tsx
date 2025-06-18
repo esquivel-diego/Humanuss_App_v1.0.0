@@ -27,7 +27,7 @@ const DaysCard = () => {
   return (
     <div
       onClick={() => navigate('/days')}
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
+      className="card-bg rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
     >
       <h2 className="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase mb-4">
         DÍAS DISPONIBLES

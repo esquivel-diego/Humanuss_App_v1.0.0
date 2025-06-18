@@ -43,8 +43,7 @@ const CheckInCard = () => {
     return (
         <div
             onClick={handleCheckIn}
-            style={{ backgroundColor: "rgba(0,123,255,0.08)" }}
-            className="rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition flex flex-col items-center justify-center h-32 w-full"
+            className="card-bg rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition flex flex-col items-center justify-center h-32 w-full"
         >
             <div className="flex items-center justify-between w-full text-xs text-black dark:text-white font-semibold">
                 <span>CHECK-IN</span>

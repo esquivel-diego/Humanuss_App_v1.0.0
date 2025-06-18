@@ -13,7 +13,7 @@ body,
     /* Modo claro */
     --background: linear-gradient(to bottom, #bec4d9 0%, #92a1c3 100%);
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --card: #CBD3E5; /* 🔄 FONDO EXACTO DE LAS CARDS */
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
@@ -91,5 +91,13 @@ body,
   .dark .sidebar-bg {
     background-color: #0f172a; /* Oscuro exacto */
   }
+
+  .card-bg {
+  background-color: var(--card);
 }
 
+.dark .card-bg {
+  background-color: theme('colors.gray.800'); /* mantiene bg-gray-800 */
+}
+
+}

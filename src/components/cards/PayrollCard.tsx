@@ -33,8 +33,7 @@ const PayrollCard = () => {
     return (
         <div
             onClick={() => navigate('/payroll')}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow px-10 py-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition h-full"
-
+            className="card-bg rounded-2xl shadow px-10 py-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition h-full"
         >
             <div className="flex flex-col justify-center h-full">
                 <div className="flex justify-between items-center text-left">
