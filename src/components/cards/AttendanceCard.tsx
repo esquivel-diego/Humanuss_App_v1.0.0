@@ -11,6 +11,7 @@ import type { RectangleProps } from "recharts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@store/authStore";
+import { useAttendanceStore } from "@store/attendanceStore";
 import attendanceData from "@mocks/attendance.json";
 
 interface AttendanceBar {
@@ -36,6 +37,7 @@ const AttendanceCard = () => {
 
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const getWeek = useAttendanceStore((state) => state.getWeek);
 
   const parseToMinutes = (time: string) => {
     const [h, m] = time.split(":").map(Number);
@@ -64,17 +66,28 @@ const AttendanceCard = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
+
     const userData = (attendanceData as AttendanceEntry[]).find(
-      (entry) => entry.userId === user?.id
+      (entry) => entry.userId === user.id
     );
 
     if (!userData) return;
 
-    const checkIns = userData.week.map((d) => parseToMinutes(d.checkIn));
+    const override = getWeek(user.id);
+    const mergedWeek = userData.week.map((d) => {
+      const overrideDay = override.find((o) => o.day === d.day);
+      return {
+        day: d.day,
+        checkIn: overrideDay?.checkIn || d.checkIn,
+      };
+    });
+
+    const checkIns = mergedWeek.map((d) => parseToMinutes(d.checkIn));
     const adjustedMin = Math.min(...checkIns) - 15;
     const adjustedMax = Math.max(...checkIns);
 
-    const parsed: AttendanceBar[] = userData.week.map((d) => {
+    const parsed: AttendanceBar[] = mergedWeek.map((d) => {
       const m = parseToMinutes(d.checkIn);
       return {
         name: d.day.slice(0, 3),
@@ -88,7 +101,7 @@ const AttendanceCard = () => {
     setChartData(parsed);
     setMin(adjustedMin);
     setMax(adjustedMax);
-  }, [user]);
+  }, [user, getWeek]); // <- re-renderiza automáticamente cuando el store cambia
 
   return (
     <div

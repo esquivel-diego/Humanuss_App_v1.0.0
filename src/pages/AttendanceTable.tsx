@@ -1,34 +1,53 @@
-
 import { useAuthStore } from "@store/authStore";
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
-import data from "@mocks/attendance.json"
+import { useAttendanceStore } from "@store/attendanceStore";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import data from "@mocks/attendance.json";
 
 interface DayEntry {
-  day: string
-  checkIn: string
-  checkOut: string
+  day: string;
+  checkIn: string;
+  checkOut: string;
+}
+
+interface AttendanceEntry {
+  userId: number;
+  week: DayEntry[];
 }
 
 const parseToMinutes = (time: string) => {
-  const [h, m] = time.split(":").map(Number)
-  return h * 60 + m
-}
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+};
 
 const AttendanceTable = () => {
-  const [week, setWeek] = useState<DayEntry[]>([])
-  const navigate = useNavigate()
+  const [week, setWeek] = useState<DayEntry[]>([]);
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const getWeek = useAttendanceStore((state) => state.getWeek);
 
   useEffect(() => {
-    const user = useAuthStore.getState().user
-const userData = data.find((d) => d.userId === user?.id)
+    if (!user) return;
 
-if (userData) {
-  setWeek(userData.week)
-}
+    const userData = (data as AttendanceEntry[]).find(
+      (d) => d.userId === user.id
+    );
 
-  }, [])
+    if (!userData) return;
+
+    const override = getWeek(user.id);
+    const mergedWeek = userData.week.map((day) => {
+      const overrideDay = override.find((o) => o.day === day.day);
+      return {
+        day: day.day,
+        checkIn: overrideDay?.checkIn || day.checkIn,
+        checkOut: overrideDay?.checkOut || day.checkOut,
+      };
+    });
+
+    setWeek(mergedWeek);
+  }, [user, getWeek]);
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative">
@@ -66,32 +85,37 @@ if (userData) {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {week.map((entry, i) => {
-                const checkInMin = parseToMinutes(entry.checkIn)
-                const status = checkInMin <= 480 ? "ON-TIME" : "LATE"
+                const checkInMin = parseToMinutes(entry.checkIn);
+                const status = checkInMin <= 480 ? "ON-TIME" : "LATE";
                 const statusColor =
                   status === "ON-TIME"
                     ? "bg-green-100 text-green-800"
-                    : "bg-yellow-100 text-yellow-800"
+                    : "bg-yellow-100 text-yellow-800";
 
                 return (
-                  <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                  <tr
+                    key={i}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  >
                     <td className="px-6 py-4 text-sm font-medium">{entry.day}</td>
                     <td className="px-6 py-4 text-sm">{entry.checkIn}</td>
                     <td className="px-6 py-4 text-sm">{entry.checkOut}</td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor}`}>
+                      <span
+                        className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor}`}
+                      >
                         {status}
                       </span>
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AttendanceTable
+export default AttendanceTable;
