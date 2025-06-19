@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuthStore } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
-import { loginWithMock } from '@services/authService'
+import { loginWithMock, type User } from '@services/authService'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
@@ -14,8 +14,13 @@ export default function Login() {
   const [error, setError] = useState('')
 
   const handleLogin = () => {
+    if (!username.trim() || !password.trim()) {
+      setError('Por favor ingresa usuario y contraseña')
+      return
+    }
+
     try {
-      const user = loginWithMock(username.trim(), password.trim())
+      const user: User = loginWithMock(username.trim(), password.trim())
       login(user)
       navigate('/dashboard')
     } catch (err) {
