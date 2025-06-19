@@ -1,12 +1,5 @@
 import { create } from 'zustand'
-
-export type User = {
-  id: number
-  name: string
-  role: 'admin' | 'employee'
-  username: string
-  token: string
-}
+import type { User } from '@services/authService'
 
 type AuthStore = {
   user: User | null
