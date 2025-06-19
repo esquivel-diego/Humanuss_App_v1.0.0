@@ -1,37 +1,46 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import data from "@mocks/payroll.json";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { ArrowLeft } from "lucide-react"
+import data from "@mocks/payroll.json"
 
 interface Payment {
-  amount: number;
-  date: string;
+  amount: number
+  date: string
 }
 
 const formatMonth = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const month = date.toLocaleString("es-ES", { month: "long" }).toUpperCase();
-  const year = date.getFullYear();
-  const quincena =
-    date.getDate() <= 15 ? "PRIMERA QUINCENA" : "SEGUNDA QUINCENA";
-  return { month, year, quincena };
-};
+  const date = new Date(dateStr)
+  const month = date.toLocaleString("es-ES", { month: "long" }).toUpperCase()
+  const year = date.getFullYear()
+  const quincena = date.getDate() <= 15 ? "PRIMERA QUINCENA" : "SEGUNDA QUINCENA"
+  return { month, year, quincena }
+}
 
 const PayrollTable = () => {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const navigate = useNavigate();
+  const [payments, setPayments] = useState<Payment[]>([])
+  const navigate = useNavigate()
 
   useEffect(() => {
-    setPayments(data.payments);
-  }, []);
+    setPayments(data.payments)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6">
+    <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative">
+      {/* Botón flotante de regreso */}
+      <button
+        onClick={() => navigate("/")}
+        className="fixed bottom-4 right-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"
+        aria-label="Volver"
+      >
+        <ArrowLeft className="w-6 h-6 text-white" />
+      </button>
+
       <div className="max-w-5xl mx-auto">
         <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow mb-6">
           Nómina y Pagos
         </div>
 
-        <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-2xl">
+        <div className="overflow-x-auto card-bg shadow-xl rounded-2xl">
           <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-100 dark:bg-gray-700 text-left">
               <tr>
@@ -51,7 +60,7 @@ const PayrollTable = () => {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {payments.map((payment, i) => {
-                const { month, year, quincena } = formatMonth(payment.date);
+                const { month, year, quincena } = formatMonth(payment.date)
                 return (
                   <tr
                     key={i}
@@ -68,14 +77,14 @@ const PayrollTable = () => {
                       })}
                     </td>
                   </tr>
-                );
+                )
               })}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PayrollTable;
+export default PayrollTable
