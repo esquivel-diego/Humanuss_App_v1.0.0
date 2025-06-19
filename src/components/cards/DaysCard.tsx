@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@store/authStore';
 import data from '@mocks/days.json';
 
 interface Request {
@@ -9,16 +10,26 @@ interface Request {
 }
 
 const DaysCard = () => {
-  const [availableDays, setAvailableDays] = useState<number>(0);
+  const totalDays = 15;
+  const [availableDays, setAvailableDays] = useState<number>(totalDays);
   const [requests, setRequests] = useState<Request[]>([]);
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
-    setAvailableDays(data.availableDays);
-    setRequests(data.requests);
-  }, []);
+    const userData = data.find((d) => d.userId === user?.id);
+    if (userData) {
+      const approvedRequests = userData.requests.filter(
+        (req: Request) =>
+          req.status.toLowerCase() === 'aprobado' &&
+          (req.type === 'Vacación' || req.type === 'Permiso')
+      );
 
-  const totalDays = 15;
+      setRequests(userData.requests);
+      setAvailableDays(totalDays - approvedRequests.length);
+    }
+  }, [user]);
+
   const takenDays = totalDays - availableDays;
   const lastStatus = requests[0]?.status || 'N/A';
   const isApproved =

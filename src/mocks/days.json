@@ -1,15 +1,43 @@
-{
-    "availableDays": 15,
+[
+  {
+    "userId": 1,
     "requests": [
-        {
-            "date": "2025-06-03",
-            "type": "Vacación",
-            "status": "Aprobado"
-        },
-        {
-            "date": "2025-05-20",
-            "type": "Permiso",
-            "status": "Pendiente"
-        }
+      {
+        "date": "2025-06-05",
+        "type": "Vacación",
+        "status": "Aprobado"
+      },
+      {
+        "date": "2025-06-12",
+        "type": "Permiso",
+        "status": "Aprobado"
+      },
+      {
+        "date": "2025-06-15",
+        "type": "Vacación",
+        "status": "Aprobado"
+      }
     ]
-}
+  },
+  {
+    "userId": 2,
+    "requests": [
+      {
+        "date": "2025-06-05",
+        "type": "Vacación",
+        "status": "Pendiente"
+      },
+      {
+        "date": "2025-06-12",
+        "type": "Permiso",
+        "status": "Rechazado"
+      },
+      {
+        "date": "2025-06-15",
+        "type": "Vacación",
+        "status": "Pendiente"
+      }
+    ]
+  }
+]
+

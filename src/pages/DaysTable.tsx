@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import data from "@mocks/days.json"
+import { useAuthStore } from '@store/authStore'
 
 interface Request {
   date: string
@@ -14,7 +15,11 @@ const DaysTable = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    setRequests(data.requests)
+    const user = useAuthStore.getState().user
+    const userData = data.find((d) => d.userId === user?.id)
+    if (userData) {
+      setRequests(userData.requests)
+    }
   }, [])
 
   return (
@@ -33,7 +38,8 @@ const DaysTable = () => {
           Solicitudes de Días
         </div>
 
-        <div className="overflow-x-auto card-bg shadow-xl rounded-2xl">
+        {/* Scroll solo si es necesario */}
+        <div className="card-bg shadow-xl rounded-2xl overflow-x-auto overflow-y-auto max-h-[70vh]">
           <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-100 dark:bg-gray-700 text-left">
               <tr>
@@ -49,30 +55,38 @@ const DaysTable = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {requests.map((req, i) => {
-                const statusUpper = req.status.toUpperCase()
-                const statusColor =
-                  statusUpper === "APROBADO" || statusUpper === "APPROVED"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
+              {requests.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-6 text-sm text-center text-gray-400">
+                    No hay solicitudes registradas.
+                  </td>
+                </tr>
+              ) : (
+                requests.map((req, i) => {
+                  const statusUpper = req.status.toUpperCase()
+                  const statusColor =
+                    statusUpper === "APROBADO" || statusUpper === "APPROVED"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
 
-                return (
-                  <tr
-                    key={i}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                  >
-                    <td className="px-6 py-4 text-sm">{req.date}</td>
-                    <td className="px-6 py-4 text-sm">{req.type}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor}`}
-                      >
-                        {statusUpper}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
+                  return (
+                    <tr
+                      key={i}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    >
+                      <td className="px-6 py-4 text-sm">{req.date}</td>
+                      <td className="px-6 py-4 text-sm">{req.type}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor}`}
+                        >
+                          {statusUpper}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
