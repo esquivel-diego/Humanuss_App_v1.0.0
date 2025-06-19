@@ -1,32 +1,27 @@
-import { useEffect, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import rawRequests from '@mocks/requests.json'
-
-type Request = {
-  id: number
-  employee: string
-  type: string
-  date: string
-  status: 'pendiente' | 'aprobada' | 'rechazada'
-}
-
-const requestsMock = rawRequests as Request[]
+import { useNotificationStore } from '@store/notificationStore'
+import { useRequestStore } from '@store/requestStore'
+import users from '@mocks/users.json'
 
 const AdminRequests = () => {
-  const [requests, setRequests] = useState<Request[]>([])
   const navigate = useNavigate()
+  const requests = useRequestStore((state) => state.requests)
+  const updateRequestStatus = useRequestStore((state) => state.updateStatus)
+  const addNotification = useNotificationStore((state) => state.addNotification)
 
-  useEffect(() => {
-    setRequests(requestsMock)
-  }, [])
+  const handleUpdate = (id: number, newStatus: 'aprobada' | 'rechazada') => {
+    const req = requests.find((r) => r.id === id)
+    if (!req) return
 
-  const updateStatus = (id: number, newStatus: 'aprobada' | 'rechazada') => {
-    setRequests((prev) =>
-      prev.map((req) =>
-        req.id === id ? { ...req, status: newStatus } : req
-      )
-    )
+    addNotification({
+      userId: req.userId,
+      message: `Tu solicitud de ${req.type.toLowerCase()} ha sido ${newStatus}`,
+      date: new Date().toISOString(),
+      read: false
+    })
+
+    updateRequestStatus(id, newStatus)
   }
 
   const getStatusColor = (status: string) => {
@@ -38,7 +33,6 @@ const AdminRequests = () => {
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 relative">
-      {/* Botón flotante de regreso */}
       <button
         onClick={() => navigate('/dashboard')}
         className="fixed bottom-4 right-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"
@@ -48,12 +42,10 @@ const AdminRequests = () => {
       </button>
 
       <div className="max-w-5xl mx-auto p-6">
-        {/* Título estilo DaysTable */}
         <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow mb-6">
           Solicitudes de RRHH
         </div>
 
-        {/* Tabla */}
         <div className="overflow-x-auto card-bg shadow-xl rounded-2xl">
           <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-100 dark:bg-gray-700 text-left">
@@ -67,10 +59,13 @@ const AdminRequests = () => {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {requests.map((req) => {
+                const user = users.find((u) => u.id === req.userId)
+                const employeeName = user?.name || 'Desconocido'
                 const statusLabel = req.status.toUpperCase()
+
                 return (
                   <tr key={req.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                    <td className="px-6 py-4 text-sm">{req.employee}</td>
+                    <td className="px-6 py-4 text-sm">{employeeName}</td>
                     <td className="px-6 py-4 text-sm">{req.type}</td>
                     <td className="px-6 py-4 text-sm">{req.date}</td>
                     <td className="px-6 py-4">
@@ -82,13 +77,13 @@ const AdminRequests = () => {
                       {req.status === 'pendiente' ? (
                         <div className="flex justify-center gap-2">
                           <button
-                            onClick={() => updateStatus(req.id, 'aprobada')}
+                            onClick={() => handleUpdate(req.id, 'aprobada')}
                             className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-xs"
                           >
                             Aprobar
                           </button>
                           <button
-                            onClick={() => updateStatus(req.id, 'rechazada')}
+                            onClick={() => handleUpdate(req.id, 'rechazada')}
                             className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-xs"
                           >
                             Rechazar

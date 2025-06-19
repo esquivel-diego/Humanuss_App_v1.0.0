@@ -1,29 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useAuthStore } from '@store/authStore'
-import rawNotifications from '@mocks/notifications.json'
-
-type Notification = {
-  id: number
-  userId: number
-  message: string
-  date: string
-  read: boolean
-}
-
-const notificationsMock = rawNotifications as Notification[]
+import { useNotificationStore } from '@store/notificationStore'
 
 const Notifications = () => {
   const user = useAuthStore((state) => state.user)
-  const [notifications, setNotifications] = useState<Notification[]>([])
+  const allNotifications = useNotificationStore((state) => state.notifications)
+  const markAllAsRead = useNotificationStore((state) => state.markAllAsRead)
+
+  const notifications = user
+    ? allNotifications.filter((n) => n.userId === user.id)
+    : []
 
   useEffect(() => {
-    if (user) {
-      const userNotifications = notificationsMock.filter(
-        (n) => n.userId === user.id
-      )
-      setNotifications(userNotifications)
-    }
-  }, [user])
+    if (user) markAllAsRead(user.id)
+  }, [user, markAllAsRead])
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6">
@@ -34,7 +24,9 @@ const Notifications = () => {
 
         <div className="card-bg p-6 rounded-2xl shadow-lg space-y-4">
           {notifications.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">No tienes notificaciones por el momento.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No tienes notificaciones por el momento.
+            </p>
           ) : (
             notifications.map((n) => (
               <div

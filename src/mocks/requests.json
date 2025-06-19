@@ -1,16 +1,23 @@
 [
-  {
-    "id": 1,
-    "employee": "Juan Pérez",
-    "type": "Vacaciones",
-    "date": "2025-06-20",
-    "status": "pendiente"
-  },
-  {
-    "id": 2,
-    "employee": "Laura Méndez",
-    "type": "Constancia laboral",
-    "date": "2025-06-18",
-    "status": "pendiente"
-  }
+    {
+        "id": 1,
+        "userId": 2,
+        "type": "Vacaciones",
+        "date": "2025-06-20",
+        "status": "pendiente"
+    },
+    {
+        "id": 2,
+        "userId": 3,
+        "type": "Constancia laboral",
+        "date": "2025-06-18",
+        "status": "pendiente"
+    },
+    {
+        "id": 3,
+        "userId": 1,
+        "type": "Certificación de ingresos",
+        "date": "2025-06-22",
+        "status": "pendiente"
+    }
 ]
