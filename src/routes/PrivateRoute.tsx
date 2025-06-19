@@ -3,15 +3,15 @@ import { useAuthStore } from '../store/authStore'
 import type { ReactNode } from 'react'
 
 type Props = {
-    children: ReactNode
+  children: ReactNode
 }
 
 export default function PrivateRoute({ children }: Props) {
-    const { isAuthenticated } = useAuthStore()
+  const user = useAuthStore((state) => state.user)
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />
-    }
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
 
-    return <>{children}</>
+  return <>{children}</>
 }

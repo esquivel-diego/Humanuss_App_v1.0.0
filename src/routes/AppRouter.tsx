@@ -15,7 +15,7 @@ import News from '../pages/modules/News'
 import NewsDetail from '../pages/modules/NewsDetail'
 import WorkCertificateRequest from '../pages/modules/rrhh/WorkCertificateRequest'
 import IncomeCertificationRequest from '../pages/modules/rrhh/IncomeCertificationRequest'
-
+import { Navigate } from 'react-router-dom'
 
 
 
@@ -25,6 +25,9 @@ const AppRouter = () => (
             {/* Ruta pública */}
             <Route path="/login" element={<Login />} />
 
+            {/* ✅ Redirección para raíz si no hay sesión */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
             {/* Rutas protegidas dentro del layout */}
             <Route
                 element={
@@ -33,13 +36,12 @@ const AppRouter = () => (
                     </PrivateRoute>
                 }
             >
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/attendance" element={<AttendanceTable />} />
                 <Route path="/days" element={<DaysTable />} />
                 <Route path="/payroll" element={<PayrollTable />} />
                 <Route path="/payroll/:index" element={<PayrollDetail />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/modules/vacaciones" element={<LeaveRequest />} />
                 <Route path="/modules/ausencias" element={<Absences />} />
@@ -47,11 +49,10 @@ const AppRouter = () => (
                 <Route path="/novedades/:id" element={<NewsDetail />} />
                 <Route path="/modules/rrhh/work-certificate" element={<WorkCertificateRequest />} />
                 <Route path="/modules/rrhh/income-certification" element={<IncomeCertificationRequest />} />
-
             </Route>
-
         </Routes>
     </BrowserRouter>
+
 )
 
 export default AppRouter

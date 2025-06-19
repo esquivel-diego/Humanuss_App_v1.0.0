@@ -19,6 +19,7 @@ const Sidebar = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const logout = useAuthStore((state) => state.logout)
+  const user = useAuthStore((state) => state.user)
 
   const [collapsed, setCollapsed] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('light')
@@ -49,6 +50,14 @@ const Sidebar = () => {
     { path: '/settings', label: 'Settings', icon: <Settings size={18} /> },
     { label: 'Modules', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
   ]
+
+  // 🔐 Agregamos ítems exclusivos para admin
+  if (user?.role === 'admin') {
+    mainMenu.push(
+      { path: '/admin/solicitudes', label: 'Solicitudes', icon: <FileText size={18} /> },
+      { path: '/admin/noticias', label: 'Publicar noticias', icon: <Megaphone size={18} /> }
+    )
+  }
 
   const moduleMenu: MenuItem[] = [
     {
@@ -87,7 +96,7 @@ const Sidebar = () => {
     activeMenu === 'modules' ? moduleMenu :
     rrhhMenu
 
-return (
+  return (
     <aside
       className={cn(
         'h-screen sidebar-background border-r transition-all duration-300 flex flex-col justify-between',
