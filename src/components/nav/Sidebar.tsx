@@ -5,6 +5,7 @@ import {
   Plane, CalendarX, FileText, Megaphone, ArrowLeft, LogOut, Bell
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { useNotificationStore } from '../../store/notificationStore'
 import { cn } from '@utils/cn'
 
 type MenuItem = {
@@ -20,6 +21,7 @@ const Sidebar = () => {
   const navigate = useNavigate()
   const logout = useAuthStore((state) => state.logout)
   const user = useAuthStore((state) => state.user)
+  const notifications = useNotificationStore((state) => state.notifications)
 
   const [collapsed, setCollapsed] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('light')
@@ -45,14 +47,26 @@ const Sidebar = () => {
     document.documentElement.classList.toggle('dark', newTheme === 'dark')
   }
 
+  const unreadCount = notifications.filter(n => !n.read && n.userId === user?.id).length
+
   const mainMenu: MenuItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
     { path: '/settings', label: 'Settings', icon: <Settings size={18} /> },
-    { path: '/notificaciones', label: 'Notificaciones', icon: <Bell size={18} /> },
+    {
+      path: '/notificaciones',
+      label: 'Notificaciones',
+      icon: (
+        <div className="relative">
+          <Bell size={18} />
+          {unreadCount > 0 && (
+            <span className="absolute top-0 left-0 w-2 h-2 bg-red-500 rounded-full" />
+          )}
+        </div>
+      )
+    },
     { label: 'Modules', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
   ]
 
-  // 🔐 Agregamos ítems exclusivos para admin
   if (user?.role === 'admin') {
     mainMenu.push(
       { path: '/admin/solicitudes', label: 'Solicitudes', icon: <FileText size={18} /> },
@@ -61,12 +75,7 @@ const Sidebar = () => {
   }
 
   const moduleMenu: MenuItem[] = [
-    {
-      label: 'Back',
-      icon: <ArrowLeft size={18} />,
-      action: () => setActiveMenu('main'),
-      isPrimary: true
-    },
+    { label: 'Back', icon: <ArrowLeft size={18} />, action: () => setActiveMenu('main'), isPrimary: true },
     { path: '/modules/vacaciones', label: 'Leave Request', icon: <Plane size={18} /> },
     { path: '/modules/ausencias', label: 'Absences', icon: <CalendarX size={18} /> },
     { label: 'HR Requests', icon: <FileText size={18} />, action: () => setActiveMenu('rrhh') },
@@ -74,22 +83,9 @@ const Sidebar = () => {
   ]
 
   const rrhhMenu: MenuItem[] = [
-    {
-      label: 'Back',
-      icon: <ArrowLeft size={18} />,
-      action: () => setActiveMenu('modules'),
-      isPrimary: true
-    },
-    {
-      path: '/modules/rrhh/work-certificate',
-      label: 'Work Certificate',
-      icon: <FileText size={18} />
-    },
-    {
-      path: '/modules/rrhh/income-certification',
-      label: 'Income Certification',
-      icon: <FileText size={18} />
-    }
+    { label: 'Back', icon: <ArrowLeft size={18} />, action: () => setActiveMenu('modules'), isPrimary: true },
+    { path: '/modules/rrhh/work-certificate', label: 'Work Certificate', icon: <FileText size={18} /> },
+    { path: '/modules/rrhh/income-certification', label: 'Income Certification', icon: <FileText size={18} /> }
   ]
 
   const currentMenu =
@@ -105,7 +101,6 @@ const Sidebar = () => {
       )}
     >
       <div>
-        {/* Header */}
         <div className="p-4 flex justify-between items-center">
           {!collapsed && <span className="text-xl font-bold">Humanuss</span>}
           <button
@@ -116,7 +111,6 @@ const Sidebar = () => {
           </button>
         </div>
 
-        {/* Menu */}
         <nav className="flex flex-col gap-1 px-2">
           {currentMenu.map((item) =>
             item.path ? (
@@ -152,7 +146,6 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      {/* Theme + Logout */}
       <div className="px-2 py-4 flex flex-col gap-2">
         <button
           onClick={handleLogout}
