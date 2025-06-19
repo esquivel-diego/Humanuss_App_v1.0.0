@@ -1,13 +1,35 @@
-{
-    "employee": "Diego Esquivel",
+[
+  {
+    "userId": 1,
     "payments": [
-        {
-            "amount": 8000,
-            "date": "2025-05-31"
-        },
-        {
-            "amount": 8000,
-            "date": "2025-04-30"
-        }
+      {
+        "date": "2025-05-31",
+        "amount": 8000,
+        "downloadUrl": "/boletas/boleta-ejemplo.pdf",
+        "earnings": [
+          { "label": "Sueldo Ordinario", "amount": 6000 },
+          { "label": "Bonificación Decreto 37-2001", "amount": 250 },
+          { "label": "Bonificación Incentivo", "amount": 1750 }
+        ],
+        "deductions": [
+          { "label": "Impuesto sobre la Renta", "amount": 300 },
+          { "label": "Seguro Social", "amount": 250 },
+          { "label": "Anticipo de Sueldo", "amount": 500 }
+        ]
+      },
+      {
+        "date": "2025-04-30",
+        "amount": 7900,
+        "downloadUrl": "/boletas/boleta-ejemplo.pdf",
+        "earnings": [
+          { "label": "Sueldo Ordinario", "amount": 6000 },
+          { "label": "Bonificación Decreto 37-2001", "amount": 250 },
+          { "label": "Bono Extra", "amount": 2000 }
+        ],
+        "deductions": [
+          { "label": "Seguro Social", "amount": 350 }
+        ]
+      }
     ]
-}
+  }
+]

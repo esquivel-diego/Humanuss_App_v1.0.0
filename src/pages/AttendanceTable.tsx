@@ -1,3 +1,5 @@
+
+import { useAuthStore } from "@store/authStore";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
@@ -19,7 +21,13 @@ const AttendanceTable = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    setWeek(data.week)
+    const user = useAuthStore.getState().user
+const userData = data.find((d) => d.userId === user?.id)
+
+if (userData) {
+  setWeek(userData.week)
+}
+
   }, [])
 
   return (

@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
+import { useAuthStore } from "@store/authStore"
 import data from "@mocks/payroll.json"
 
 interface Payment {
   amount: number
   date: string
+}
+
+interface PayrollEntry {
+  userId: number
+  payments: Payment[]
 }
 
 const formatMonth = (dateStr: string) => {
@@ -19,10 +25,19 @@ const formatMonth = (dateStr: string) => {
 const PayrollTable = () => {
   const [payments, setPayments] = useState<Payment[]>([])
   const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
 
-  useEffect(() => {
-    setPayments(data.payments)
-  }, [])
+useEffect(() => {
+  const userData = (data as PayrollEntry[]).find((entry) => entry.userId === user?.id)
+
+  if (userData && Array.isArray(userData.payments) && userData.payments.length > 0) {
+    const sorted = [...userData.payments].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+    setPayments(sorted)
+  }
+}, [user])
+
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative">
@@ -79,6 +94,13 @@ const PayrollTable = () => {
                   </tr>
                 )
               })}
+              {payments.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center px-6 py-4 text-gray-500 dark:text-gray-400">
+                    No hay boletas disponibles.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

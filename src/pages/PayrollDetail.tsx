@@ -1,20 +1,26 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
+import { useAuthStore } from "@store/authStore"
 import payrollData from "@mocks/payroll.json"
+import type { PayrollEntry } from '../types/payroll'
 
-const getBoletaUrl = (): string => {
-  return "/boletas/boleta-ejemplo.pdf"
-}
+
 
 const PayrollDetail = () => {
   const { index } = useParams()
   const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
   const paymentIndex = Number(index)
-  const payment = payrollData.payments[paymentIndex]
+
+  const userData = (payrollData as PayrollEntry[]).find(
+    (entry) => entry.userId === user?.id
+  )
+
+  const payment = userData?.payments?.[paymentIndex]
 
   if (!payment) {
     return (
-      <div className="min-h-screen text-gray-800 dark:text-gray-100 p-6">
+      <div className="min-h-screen p-6 text-gray-800 dark:text-gray-100">
         <p>Boleta no encontrada.</p>
         <button
           onClick={() => navigate("/payroll")}
@@ -26,13 +32,12 @@ const PayrollDetail = () => {
     )
   }
 
-  const formattedAmount = payment.amount.toLocaleString("es-GT", {
-    minimumFractionDigits: 0,
-  })
+  const totalEarnings = payment.earnings.reduce((sum, e) => sum + e.amount, 0)
+  const totalDeductions = payment.deductions.reduce((sum, d) => sum + d.amount, 0)
 
   const handleDownload = () => {
     const link = document.createElement("a")
-    link.href = getBoletaUrl()
+    link.href = payment.downloadUrl || "/boletas/boleta-ejemplo.pdf"
     link.download = `boleta-${payment.date}.pdf`
     document.body.appendChild(link)
     link.click()
@@ -52,70 +57,59 @@ const PayrollDetail = () => {
       </button>
 
       <div className="w-full max-w-5xl mx-auto space-y-6">
-        {/* Header */}
         <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow">
-          Detalle
+          Detalle del Pago
         </div>
 
-        {/* INGRESOS */}
+        {/* Ingresos */}
         <div className="card-bg rounded-2xl p-4 shadow-xl">
           <div className="flex justify-between font-semibold text-sm uppercase border-b pb-2 mb-2">
             <span>Ingresos</span>
             <span>Monto</span>
           </div>
           <div className="text-sm space-y-2">
-            <div className="flex justify-between">
-              <span>Sueldo Ordinario</span>
-              <span>6,000</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Bonificación Decreto 37-2001</span>
-              <span>250</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Bonificación Incentivo</span>
-              <span>5,500</span>
-            </div>
+            {payment.earnings.map((e, i) => (
+              <div key={i} className="flex justify-between">
+                <span>{e.label}</span>
+                <span>{e.amount.toLocaleString("es-GT")}</span>
+              </div>
+            ))}
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
             <div className="flex justify-between font-semibold">
               <span>Total Ingresos</span>
-              <span>11,750</span>
+              <span>{totalEarnings.toLocaleString("es-GT")}</span>
             </div>
           </div>
         </div>
 
-        {/* DEDUCCIONES */}
+        {/* Deducciones */}
         <div className="card-bg rounded-2xl p-4 shadow-xl">
           <div className="flex justify-between font-semibold text-sm uppercase border-b pb-2 mb-2">
             <span>Deducciones</span>
             <span>Monto</span>
           </div>
           <div className="text-sm space-y-2">
-            <div className="flex justify-between">
-              <span>Impuesto sobre la Renta</span>
-              <span>300</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Seguro Social</span>
-              <span>250</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Anticipo de Sueldo</span>
-              <span>6,000</span>
-            </div>
+            {payment.deductions.map((d, i) => (
+              <div key={i} className="flex justify-between">
+                <span>{d.label}</span>
+                <span>{d.amount.toLocaleString("es-GT")}</span>
+              </div>
+            ))}
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
             <div className="flex justify-between font-semibold">
               <span>Total Deducciones</span>
-              <span>6,550</span>
+              <span>{totalDeductions.toLocaleString("es-GT")}</span>
             </div>
           </div>
         </div>
 
-        {/* LÍQUIDO A RECIBIR */}
+        {/* Líquido a recibir */}
         <div className="card-bg rounded-2xl p-4 shadow-xl">
           <div className="flex justify-between font-bold text-sm uppercase">
             <span>Líquido a recibir</span>
-            <span>{`Q${formattedAmount}`}</span>
+            <span>
+              Q{payment.amount.toLocaleString("es-GT", { minimumFractionDigits: 2 })}
+            </span>
           </div>
 
           <button

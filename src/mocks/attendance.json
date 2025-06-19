@@ -1,29 +1,62 @@
-{
+[
+  {
+    "userId": 1,
     "week": [
-        {
-            "day": "Lunes",
-            "checkIn": "07:45",
-            "checkOut": "17:00"
-        },
-        {
-            "day": "Martes",
-            "checkIn": "07:50",
-            "checkOut": "17:05"
-        },
-        {
-            "day": "Miércoles",
-            "checkIn": "7:40",
-            "checkOut": "17:00"
-        },
-        {
-            "day": "Jueves",
-            "checkIn": "07:00",
-            "checkOut": "17:10"
-        },
-        {
-            "day": "Viernes",
-            "checkIn": "07:35",
-            "checkOut": "16:55"
-        }
+      {
+        "day": "Lunes",
+        "checkIn": "06:45",
+        "checkOut": "17:00"
+      },
+      {
+        "day": "Martes",
+        "checkIn": "07:50",
+        "checkOut": "17:05"
+      },
+      {
+        "day": "Miércoles",
+        "checkIn": "07:40",
+        "checkOut": "17:00"
+      },
+      {
+        "day": "Jueves",
+        "checkIn": "07:00",
+        "checkOut": "17:10"
+      },
+      {
+        "day": "Viernes",
+        "checkIn": "07:35",
+        "checkOut": "16:55"
+      }
     ]
-}
+  },
+  {
+    "userId": 2,
+    "week": [
+      {
+        "day": "Lunes",
+        "checkIn": "08:10",
+        "checkOut": "17:20"
+      },
+      {
+        "day": "Martes",
+        "checkIn": "08:15",
+        "checkOut": "17:00"
+      },
+      {
+        "day": "Miércoles",
+        "checkIn": "08:00",
+        "checkOut": "17:00"
+      },
+      {
+        "day": "Jueves",
+        "checkIn": "08:05",
+        "checkOut": "17:05"
+      },
+      {
+        "day": "Viernes",
+        "checkIn": "08:00",
+        "checkOut": "17:00"
+      }
+    ]
+  }
+]
