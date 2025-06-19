@@ -20,7 +20,7 @@ const Dashboard = () => {
   }, [])
 
   return (
-    <div className="max-w-5xl mx-auto grid gap-6 p-4">
+    <div className="max-w-5xl mx-auto grid gap-6 px-4 pb-4">
       {/* Sección de usuario */}
       <div className="flex items-center justify-between px-2 py-3 mb-4">
         <div>

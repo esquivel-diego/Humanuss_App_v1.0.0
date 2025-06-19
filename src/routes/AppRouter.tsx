@@ -11,9 +11,11 @@ import AppLayout from '../layouts/AppLayout'
 import Profile from '../pages/Profile'
 import LeaveRequest from '../pages/modules/LeaveRequest'
 import Absences from '../pages/modules/Absences'
-import HRRequests from '../pages/modules/HRRequests'
 import News from '../pages/modules/News'
 import NewsDetail from '../pages/modules/NewsDetail'
+import WorkCertificateRequest from '../pages/modules/rrhh/WorkCertificateRequest'
+import IncomeCertificationRequest from '../pages/modules/rrhh/IncomeCertificationRequest'
+
 
 
 
@@ -41,9 +43,11 @@ const AppRouter = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/modules/vacaciones" element={<LeaveRequest />} />
                 <Route path="/modules/ausencias" element={<Absences />} />
-                <Route path="/modules/solicitudes" element={<HRRequests />} />
                 <Route path="/modules/novedades" element={<News />} />
                 <Route path="/novedades/:id" element={<NewsDetail />} />
+                <Route path="/modules/rrhh/work-certificate" element={<WorkCertificateRequest />} />
+                <Route path="/modules/rrhh/income-certification" element={<IncomeCertificationRequest />} />
+
             </Route>
 
         </Routes>

@@ -22,7 +22,7 @@ const Sidebar = () => {
 
   const [collapsed, setCollapsed] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('light')
-  const [activeMenu, setActiveMenu] = useState<'main' | 'modules'>('main')
+  const [activeMenu, setActiveMenu] = useState<'main' | 'modules' | 'rrhh'>('main')
 
   const handleLogout = () => {
     logout()
@@ -46,26 +46,48 @@ const Sidebar = () => {
 
   const mainMenu: MenuItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-    { path: '/settings', label: 'Configuración', icon: <Settings size={18} /> },
-    { label: 'Módulos', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
+    { path: '/settings', label: 'Settings', icon: <Settings size={18} /> },
+    { label: 'Modules', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
   ]
 
   const moduleMenu: MenuItem[] = [
     {
-      label: 'Volver',
+      label: 'Back',
       icon: <ArrowLeft size={18} />,
       action: () => setActiveMenu('main'),
       isPrimary: true
     },
-    { path: '/modules/vacaciones', label: 'Vacaciones', icon: <Plane size={18} /> },
-    { path: '/modules/ausencias', label: 'Ausencias', icon: <CalendarX size={18} /> },
-    { path: '/modules/solicitudes', label: 'Solicitudes RRHH', icon: <FileText size={18} /> },
-    { path: '/modules/novedades', label: 'Novedades', icon: <Megaphone size={18} /> }
+    { path: '/modules/vacaciones', label: 'Leave Request', icon: <Plane size={18} /> },
+    { path: '/modules/ausencias', label: 'Absences', icon: <CalendarX size={18} /> },
+    { label: 'HR Requests', icon: <FileText size={18} />, action: () => setActiveMenu('rrhh') },
+    { path: '/modules/novedades', label: 'News', icon: <Megaphone size={18} /> }
   ]
 
-  const currentMenu = activeMenu === 'main' ? mainMenu : moduleMenu
+  const rrhhMenu: MenuItem[] = [
+    {
+      label: 'Back',
+      icon: <ArrowLeft size={18} />,
+      action: () => setActiveMenu('modules'),
+      isPrimary: true
+    },
+    {
+      path: '/modules/rrhh/work-certificate',
+      label: 'Work Certificate',
+      icon: <FileText size={18} />
+    },
+    {
+      path: '/modules/rrhh/income-certification',
+      label: 'Income Certification',
+      icon: <FileText size={18} />
+    }
+  ]
 
-  return (
+  const currentMenu =
+    activeMenu === 'main' ? mainMenu :
+    activeMenu === 'modules' ? moduleMenu :
+    rrhhMenu
+
+return (
     <aside
       className={cn(
         'h-screen sidebar-background border-r transition-all duration-300 flex flex-col justify-between',
@@ -73,18 +95,18 @@ const Sidebar = () => {
       )}
     >
       <div>
-        {/* Encabezado */}
+        {/* Header */}
         <div className="p-4 flex justify-between items-center">
           {!collapsed && <span className="text-xl font-bold">Humanuss</span>}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="p-1 rounded transition dark:hover:bg-gray-700 hover:bg-[#7f8db0] hover:text-white"
           >
             <Menu size={20} />
           </button>
         </div>
 
-        {/* Menú */}
+        {/* Menu */}
         <nav className="flex flex-col gap-1 px-2">
           {currentMenu.map((item) =>
             item.path ? (
@@ -92,8 +114,10 @@ const Sidebar = () => {
                 key={item.label}
                 to={item.path}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-md transition hover:bg-gray-100 dark:hover:bg-gray-800',
-                  location.pathname === item.path && 'bg-gray-200 dark:bg-gray-700'
+                  'flex items-center gap-3 px-3 py-2 rounded-md transition',
+                  location.pathname === item.path
+                    ? 'bg-[#7f8db0] text-white'
+                    : 'hover:bg-[#7f8db0] hover:text-white dark:hover:bg-gray-800'
                 )}
               >
                 {item.icon}
@@ -107,7 +131,7 @@ const Sidebar = () => {
                   'flex items-center gap-3 px-3 py-2 rounded-md text-left transition',
                   item.isPrimary
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white'
+                    : 'hover:bg-[#7f8db0] hover:text-white dark:hover:bg-gray-800 text-black dark:text-white'
                 )}
               >
                 {item.icon}
@@ -118,25 +142,32 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      {/* Tema + cerrar sesión */}
+      {/* Theme + Logout */}
       <div className="px-2 py-4 flex flex-col gap-2">
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
         >
           <LogOut size={18} />
-          {!collapsed && <span>Cerrar sesión</span>}
+          {!collapsed && <span>Logout</span>}
         </button>
 
         <hr className="border-t border-gray-200 dark:border-gray-700 mb-2" />
 
         <button
           onClick={toggleTheme}
-          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-md group transition',
+            theme === 'light'
+              ? 'hover:bg-[#7f8db0] hover:text-white text-black'
+              : 'hover:bg-gray-800 text-white'
+          )}
         >
-          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          {theme === 'light'
+            ? <Moon size={18} className="text-black group-hover:text-white transition" />
+            : <Sun size={18} />}
           {!collapsed && (
-            <span>{theme === 'light' ? 'Modo oscuro' : 'Modo claro'}</span>
+            <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
           )}
         </button>
       </div>

@@ -14,7 +14,8 @@ export default function AppLayout() {
         <MoodModal />
 
         {/* Main: contenido desplazable si es necesario, sin causar scroll global */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 pb-6 box-border">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-6 box-border">
+
           <Outlet />
         </main>
       </div>

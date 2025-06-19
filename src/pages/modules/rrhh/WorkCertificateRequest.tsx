@@ -1,29 +1,24 @@
 import { useState } from 'react'
 
-const AbsenceRequest = () => {
-  const [requestDate, setRequestDate] = useState('')
-  const [absenceType, setAbsenceType] = useState('')
-  const [dates, setDates] = useState('')
-  const [notes, setNotes] = useState('')
+const WorkCertificateRequest = () => {
+  const [reason, setReason] = useState('')
+  const [recipient, setRecipient] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!requestDate || !absenceType || !dates) {
-      alert('Completa todos los campos obligatorios.')
+    if (!reason.trim() || !recipient.trim()) {
+      alert('Por favor completa todos los campos obligatorios.')
       return
     }
 
     setSubmitted(true)
     setTimeout(() => setSubmitted(false), 5000)
-
-    setRequestDate('')
-    setAbsenceType('')
-    setDates('')
-    setNotes('')
+    setReason('')
+    setRecipient('')
   }
-
+  
   return (
     <div className="h-full rounded-2xl bg-gradient-to-br from-slate-100 to-slate-300 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white">
       <div className="w-full max-w-5xl mx-auto h-full flex flex-col justify-center">
@@ -31,71 +26,40 @@ const AbsenceRequest = () => {
         <div className="card-bg flex flex-col flex-1 rounded-2xl shadow-xl p-6 pt-10">
           {/* Título */}
           <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow text-center">
-            Solicitud de ausencia
+            Solicitud de constancia laboral
           </div>
 
-          {/* Formulario */}
           <form onSubmit={handleSubmit} className="flex flex-col justify-between flex-1 mt-6">
-            <div className="space-y-4">
-              {/* Fecha de solicitud */}
+            <div className="flex flex-col gap-4">
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
-                  Fecha de solicitud
-                </label>
-                <input
-                  type="date"
-                  value={requestDate}
-                  onChange={(e) => setRequestDate(e.target.value)}
-                  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
-                  required
-                />
-              </div>
-
-              {/* Tipo de ausencia */}
-              <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
-                  Tipo de ausencia
+                  Motivo de solicitud
                 </label>
                 <input
                   type="text"
-                  value={absenceType}
-                  onChange={(e) => setAbsenceType(e.target.value)}
-                  placeholder="type here"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Escribe aquí"
                   className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
                   required
                 />
               </div>
 
-              {/* Fechas */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
-                  Fechas
+                  A quién va dirigida
                 </label>
                 <input
                   type="text"
-                  value={dates}
-                  onChange={(e) => setDates(e.target.value)}
-                  placeholder="Ej. del 10 al 15 de agosto"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder="Escribe aquí"
                   className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
                   required
-                />
-              </div>
-
-              {/* Observaciones */}
-              <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
-                  Observaciones
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="type here"
-                  className="w-full h-24 px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 resize-none focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Botón */}
             <div className="pt-6">
               <div className="max-w-md mx-auto w-full">
                 <button
@@ -119,4 +83,4 @@ const AbsenceRequest = () => {
   )
 }
 
-export default AbsenceRequest
+export default WorkCertificateRequest
