@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import DaysCard from '@components/cards/DaysCard'
 import PayrollCard from '@components/cards/PayrollCard'
 import AttendanceCard from '@components/cards/AttendanceCard'
@@ -15,6 +16,8 @@ import CheckOutCard from '@components/cards/CheckOutCard'
  */
 
 const Dashboard = () => {
+  const navigate = useNavigate()
+
   useEffect(() => {
     document.title = 'Humanuss | Dashboard'
   }, [])
@@ -32,15 +35,15 @@ const Dashboard = () => {
           </p>
         </div>
         <img
+          onClick={() => navigate('/profile')}
           src="src/assets/logo.svg"
           alt="Foto de perfil"
-          className="w-14 h-14 rounded-full object-cover shadow-md"
+          className="w-14 h-14 rounded-full object-cover shadow-md cursor-pointer hover:brightness-110 transition"
         />
       </div>
 
       {/* Fila 1: Days + Payroll */}
       <div className="grid grid-cols-1 xlgrid:grid-cols-2 gap-6">
-
         <DaysCard />
         <PayrollCard />
       </div>
