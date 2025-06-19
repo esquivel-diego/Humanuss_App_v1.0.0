@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useNotificationStore } from '@store/notificationStore'
@@ -7,8 +8,27 @@ import users from '@mocks/users.json'
 const AdminRequests = () => {
   const navigate = useNavigate()
   const requests = useRequestStore((state) => state.requests)
+  const fetchRequests = useRequestStore((state) => state.fetchRequests)
   const updateRequestStatus = useRequestStore((state) => state.updateStatus)
   const addNotification = useNotificationStore((state) => state.addNotification)
+
+  useEffect(() => {
+    fetchRequests()
+  }, [fetchRequests])
+
+  const buildNotificationMessage = (type: string, status: 'aprobada' | 'rechazada') => {
+    const t = type.toLowerCase()
+    if (t === 'vacaciones' || t === 'permiso') {
+      return `Tu solicitud de ${t} ha sido ${status}`
+    }
+    if (t === 'constancia laboral') {
+      return `Tu constancia laboral fue ${status === 'aprobada' ? 'generada' : 'rechazada'}`
+    }
+    if (t === 'certificación de ingresos') {
+      return `Tu certificación de ingresos fue ${status === 'aprobada' ? 'generada' : 'rechazada'}`
+    }
+    return `Tu solicitud de ${t} ha sido ${status}`
+  }
 
   const handleUpdate = (id: number, newStatus: 'aprobada' | 'rechazada') => {
     const req = requests.find((r) => r.id === id)
@@ -16,7 +36,7 @@ const AdminRequests = () => {
 
     addNotification({
       userId: req.userId,
-      message: `Tu solicitud de ${req.type.toLowerCase()} ha sido ${newStatus}`,
+      message: buildNotificationMessage(req.type, newStatus),
       date: new Date().toISOString(),
       read: false
     })

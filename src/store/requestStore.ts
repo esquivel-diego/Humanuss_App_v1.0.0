@@ -1,29 +1,23 @@
 import { create } from 'zustand'
-import rawRequests from '@mocks/requests.json'
-
-export type RequestStatus = 'pendiente' | 'aprobada' | 'rechazada'
-
-export type Request = {
-  id: number
-  employee: string
-  userId: number
-  type: string
-  date: string
-  status: RequestStatus
-}
+import { getAllRequests, updateRequestStatus, type Request, type RequestStatus } from '@services/requestService'
 
 type RequestStore = {
   requests: Request[]
+  fetchRequests: () => void
   updateStatus: (id: number, newStatus: RequestStatus) => void
 }
 
 export const useRequestStore = create<RequestStore>((set) => ({
-  requests: rawRequests as Request[],
+  requests: [],
 
-  updateStatus: (id, newStatus) =>
-    set((state) => ({
-      requests: state.requests.map((r) =>
-        r.id === id ? { ...r, status: newStatus } : r
-      )
-    }))
+  fetchRequests: () => {
+    const data = getAllRequests()
+    set({ requests: data })
+  },
+
+  updateStatus: (id, newStatus) => {
+    const updated = updateRequestStatus(id, newStatus)
+    set({ requests: updated })
+  }
 }))
+
