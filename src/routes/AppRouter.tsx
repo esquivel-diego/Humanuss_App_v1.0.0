@@ -17,9 +17,12 @@ import NewsDetail from '../pages/modules/NewsDetail'
 import WorkCertificateRequest from '../pages/modules/rrhh/WorkCertificateRequest'
 import IncomeCertificationRequest from '../pages/modules/rrhh/IncomeCertificationRequest'
 
-// ✅ Importa las vistas de administración
+// ✅ Importa vistas de administración
 import AdminRequests from '../pages/admin/AdminRequests'
 import AdminNews from '../pages/admin/AdminNews'
+
+// ✅ Importa la nueva vista de notificaciones
+import Notifications from '../pages/Notifications'
 
 const AppRouter = () => {
   const user = useAuthStore((state) => state.user)
@@ -62,7 +65,10 @@ const AppRouter = () => {
           <Route path="/modules/rrhh/work-certificate" element={<WorkCertificateRequest />} />
           <Route path="/modules/rrhh/income-certification" element={<IncomeCertificationRequest />} />
 
-          {/* ✅ Rutas solo para admins */}
+          {/* ✅ Ruta de notificaciones accesible para todos los usuarios */}
+          <Route path="/notificaciones" element={<Notifications />} />
+
+          {/* ✅ Rutas exclusivas para administradores */}
           <Route
             path="/admin/solicitudes"
             element={

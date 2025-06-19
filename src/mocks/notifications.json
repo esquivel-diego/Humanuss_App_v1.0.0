@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "userId": 2,
+    "message": "Tu solicitud de vacaciones ha sido aprobada",
+    "date": "2025-06-18T10:30:00Z",
+    "read": false
+  },
+  {
+    "id": 2,
+    "userId": 2,
+    "message": "Tu constancia laboral ha sido rechazada",
+    "date": "2025-06-17T14:45:00Z",
+    "read": false
+  },
+  {
+    "id": 3,
+    "userId": 1,
+    "message": "Se publicó una nueva noticia interna",
+    "date": "2025-06-19T08:00:00Z",
+    "read": true
+  }
+]

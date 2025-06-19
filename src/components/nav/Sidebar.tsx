@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useState } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import {
   Moon, Sun, Menu, LayoutDashboard, Settings, Boxes,
-  Plane, CalendarX, FileText, Megaphone, ArrowLeft, LogOut
+  Plane, CalendarX, FileText, Megaphone, ArrowLeft, LogOut, Bell
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { cn } from '@utils/cn'
@@ -48,6 +48,7 @@ const Sidebar = () => {
   const mainMenu: MenuItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
     { path: '/settings', label: 'Settings', icon: <Settings size={18} /> },
+    { path: '/notificaciones', label: 'Notificaciones', icon: <Bell size={18} /> },
     { label: 'Modules', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
   ]
 
