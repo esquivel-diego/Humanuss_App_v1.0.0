@@ -1,19 +1,19 @@
+// src/pages/Notifications.tsx
 import { useEffect } from 'react'
-import { useAuthStore } from '@store/authStore'
 import { useNotificationStore } from '@store/notificationStore'
+import { useAuthStore } from '@store/authStore'
 
 const Notifications = () => {
   const user = useAuthStore((state) => state.user)
-  const allNotifications = useNotificationStore((state) => state.notifications)
-  const markAllAsRead = useNotificationStore((state) => state.markAllAsRead)
+const { notifications, loadFromStorage, markAsRead } = useNotificationStore()
 
-  const notifications = user
-    ? allNotifications.filter((n) => n.userId === user.id)
-    : []
+useEffect(() => {
+  loadFromStorage()
+}, [loadFromStorage])
 
-  useEffect(() => {
-    if (user) markAllAsRead(user.id)
-  }, [user, markAllAsRead])
+
+
+  const userNotifications = notifications.filter(n => n.userId === user?.id)
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6">
@@ -23,15 +23,18 @@ const Notifications = () => {
         </div>
 
         <div className="card-bg p-6 rounded-2xl shadow-lg space-y-4">
-          {notifications.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No tienes notificaciones por el momento.
-            </p>
+          {userNotifications.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">No tienes notificaciones por el momento.</p>
           ) : (
-            notifications.map((n) => (
+            userNotifications.map((n) => (
               <div
                 key={n.id}
-                className="p-4 rounded-xl border border-gray-300 dark:border-gray-700 shadow-sm flex justify-between items-start bg-white dark:bg-gray-800"
+                onClick={() => markAsRead(n.id)}
+                className={`p-4 rounded-xl border transition cursor-pointer ${
+                  n.read
+                    ? 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800'
+                    : 'border-blue-400 bg-blue-50 dark:bg-gray-700'
+                }`}
               >
                 <div>
                   <p className="font-medium">{n.message}</p>

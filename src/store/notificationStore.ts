@@ -1,3 +1,4 @@
+// src/store/notificationStore.ts
 import { create } from 'zustand'
 
 export type Notification = {
@@ -10,36 +11,36 @@ export type Notification = {
 
 type NotificationStore = {
   notifications: Notification[]
-  addNotification: (notif: Omit<Notification, 'id'>) => void
+  addNotification: (n: Omit<Notification, 'id'>) => void
   markAsRead: (id: number) => void
-  markAllAsRead: (userId: number) => void
+  loadFromStorage: () => void
 }
 
-export const useNotificationStore = create<NotificationStore>((set) => ({
+const STORAGE_KEY = 'notifications'
+
+export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
 
-  addNotification: (notif) =>
-    set((state) => ({
-      notifications: [
-        ...state.notifications,
-        {
-          id: state.notifications.length + 1,
-          ...notif
-        }
-      ]
-    })),
+  addNotification: (n) => {
+    const existing = get().notifications
+    const newNotification = { ...n, id: Date.now() }
+    const updated = [...existing, newNotification]
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    set({ notifications: updated })
+  },
 
-  markAsRead: (id) =>
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      )
-    })),
+  markAsRead: (id) => {
+    const updated = get().notifications.map((n) =>
+      n.id === id ? { ...n, read: true } : n
+    )
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    set({ notifications: updated })
+  },
 
-  markAllAsRead: (userId) =>
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.userId === userId ? { ...n, read: true } : n
-      )
-    }))
+  loadFromStorage: () => {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      set({ notifications: JSON.parse(raw) })
+    }
+  }
 }))
