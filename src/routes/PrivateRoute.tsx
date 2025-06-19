@@ -5,22 +5,22 @@ import type { ReactNode } from 'react'
 
 type Props = {
   children: ReactNode
+  allowedRoles?: ('admin' | 'employee')[]
 }
 
-export default function PrivateRoute({ children }: Props) {
+export default function PrivateRoute({ children, allowedRoles }: Props) {
   const user = useAuthStore((state) => state.user)
-  const [isReady, setIsReady] = useState(false)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    // Espera un frame para permitir a Zustand hidratar desde localStorage
-    const timer = setTimeout(() => setIsReady(true), 0)
+    const timer = setTimeout(() => setReady(true), 0)
     return () => clearTimeout(timer)
   }, [])
 
-  if (!isReady) return null // ⏳ Espera para evitar redirección errónea
-
-  if (!user) {
-    return <Navigate to="/login" replace />
+  if (!ready) return null
+  if (!user) return <Navigate to="/login" replace />
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return <>{children}</>

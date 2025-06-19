@@ -17,6 +17,10 @@ import NewsDetail from '../pages/modules/NewsDetail'
 import WorkCertificateRequest from '../pages/modules/rrhh/WorkCertificateRequest'
 import IncomeCertificationRequest from '../pages/modules/rrhh/IncomeCertificationRequest'
 
+// ✅ Importa las vistas de administración
+import AdminRequests from '../pages/admin/AdminRequests'
+import AdminNews from '../pages/admin/AdminNews'
+
 const AppRouter = () => {
   const user = useAuthStore((state) => state.user)
 
@@ -26,7 +30,7 @@ const AppRouter = () => {
         {/* Ruta pública */}
         <Route path="/login" element={<Login />} />
 
-        {/* ✅ Redirección condicional desde "/" */}
+        {/* Redirección condicional desde "/" */}
         <Route
           path="/"
           element={
@@ -57,6 +61,24 @@ const AppRouter = () => {
           <Route path="/novedades/:id" element={<NewsDetail />} />
           <Route path="/modules/rrhh/work-certificate" element={<WorkCertificateRequest />} />
           <Route path="/modules/rrhh/income-certification" element={<IncomeCertificationRequest />} />
+
+          {/* ✅ Rutas solo para admins */}
+          <Route
+            path="/admin/solicitudes"
+            element={
+              <PrivateRoute allowedRoles={['admin']}>
+                <AdminRequests />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/noticias"
+            element={
+              <PrivateRoute allowedRoles={['admin']}>
+                <AdminNews />
+              </PrivateRoute>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>
