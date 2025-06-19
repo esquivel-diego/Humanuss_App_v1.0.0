@@ -27,12 +27,7 @@ const CheckInCard = () => {
       .padStart(2, "0")}`;
   };
 
-  const checkStatus = (t: string | null) => {
-    if (!t) return "PENDIENTE";
-    const [h, m] = t.split(":").map(Number);
-    const total = h * 60 + m;
-    return total <= 480 ? "ON-TIME" : "LATE";
-  };
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   const handleCheckIn = () => {
     if (!user) return;
@@ -46,8 +41,6 @@ const CheckInCard = () => {
     setTime(formatted);
   };
 
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
   useEffect(() => {
     if (!user) return;
     const today = capitalize(getCurrentDayName());
@@ -60,10 +53,13 @@ const CheckInCard = () => {
     }
   }, [user, getWeek]);
 
+  const isMarked = !!time;
+
   return (
     <div
       onClick={handleCheckIn}
-      className="card-bg rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition flex flex-col items-center justify-center h-32 w-full"
+      className={`card-bg rounded-2xl shadow p-4 cursor-pointer transition flex flex-col items-center justify-center h-32 w-full
+        ${isMarked ? "border-4 border-blue-500" : "hover:ring-2 hover:ring-blue-500"}`}
     >
       <div className="flex items-center justify-between w-full text-xs text-black dark:text-white font-semibold">
         <span>CHECK-IN</span>
@@ -71,9 +67,6 @@ const CheckInCard = () => {
       </div>
       <div className="text-2xl font-bold text-black dark:text-white mt-2">
         {time ? time : "--:--"}
-      </div>
-      <div className="text-xs text-center text-gray-500 dark:text-gray-400 tracking-wide uppercase mt-1">
-        {checkStatus(time)}
       </div>
     </div>
   );

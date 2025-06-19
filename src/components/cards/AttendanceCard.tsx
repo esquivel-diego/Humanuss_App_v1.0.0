@@ -38,6 +38,7 @@ const AttendanceCard = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const getWeek = useAttendanceStore((state) => state.getWeek);
+  const week = user ? getWeek(user.id) : [];
 
   const parseToMinutes = (time: string) => {
     const [h, m] = time.split(":").map(Number);
@@ -71,16 +72,23 @@ const AttendanceCard = () => {
     const userData = (attendanceData as AttendanceEntry[]).find(
       (entry) => entry.userId === user.id
     );
-
     if (!userData) return;
 
-    const override = getWeek(user.id);
+    const today = new Intl.DateTimeFormat("es-ES", {
+      weekday: "long",
+    })
+      .format(new Date())
+      .replace(/^\w/, (c) => c.toUpperCase());
+
     const mergedWeek = userData.week.map((d) => {
-      const overrideDay = override.find((o) => o.day === d.day);
-      return {
-        day: d.day,
-        checkIn: overrideDay?.checkIn || d.checkIn,
-      };
+      if (d.day === today) {
+        const overrideDay = week.find((o) => o.day === d.day);
+        return {
+          ...d,
+          checkIn: overrideDay?.checkIn || d.checkIn,
+        };
+      }
+      return d;
     });
 
     const checkIns = mergedWeek.map((d) => parseToMinutes(d.checkIn));
@@ -101,7 +109,7 @@ const AttendanceCard = () => {
     setChartData(parsed);
     setMin(adjustedMin);
     setMax(adjustedMax);
-  }, [user, getWeek]); // <- re-renderiza automáticamente cuando el store cambia
+  }, [user, week]); // ✅ reacciona a cambios reales, sin warning
 
   return (
     <div
@@ -113,7 +121,6 @@ const AttendanceCard = () => {
       </h2>
 
       <div className="flex flex-col md:flex-row items-center justify-center gap-2 w-full">
-        {/* Gráfico */}
         <div className="w-full max-w-[300px] h-64 mx-auto">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -157,7 +164,6 @@ const AttendanceCard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Promedio */}
         <div className="text-center md:text-left w-full md:w-1/3">
           <p className="text-xs text-gray-500 uppercase mb-1">Promedio</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-white whitespace-nowrap">

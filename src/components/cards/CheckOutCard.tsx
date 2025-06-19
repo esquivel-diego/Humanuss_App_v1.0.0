@@ -52,10 +52,13 @@ const CheckOutCard = () => {
     }
   }, [user, getWeek]);
 
+  const isMarked = !!time;
+
   return (
     <div
       onClick={handleCheckOut}
-      className="card-bg rounded-2xl shadow p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition flex flex-col items-center justify-center h-32 w-full"
+      className={`card-bg rounded-2xl shadow p-4 cursor-pointer transition flex flex-col items-center justify-center h-32 w-full
+        ${isMarked ? "border-4 border-pink-500" : "hover:ring-2 hover:ring-blue-500"}`}
     >
       <div className="flex items-center justify-between w-full text-xs text-black dark:text-white font-semibold">
         <span>CHECK-OUT</span>
@@ -66,9 +69,6 @@ const CheckOutCard = () => {
       </div>
       <div className="text-2xl font-bold text-black dark:text-white mt-2">
         {time ? time : "--:--"}
-      </div>
-      <div className="text-xs text-center text-gray-500 dark:text-gray-400 tracking-wide uppercase mt-1">
-        {time ? "CHECKED" : "PENDING"}
       </div>
     </div>
   );
