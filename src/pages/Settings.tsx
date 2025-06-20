@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@hooks/useTheme'
 import ChangePasswordModal from '@components/modals/ChangePasswordModal'
 
 const Settings = () => {
   const { theme, toggleTheme } = useTheme()
   const [modalOpen, setModalOpen] = useState(false)
+  const navigate = useNavigate()
 
   const user = {
     name: 'Diego Esquivel',
@@ -16,7 +18,10 @@ const Settings = () => {
   return (
     <div className="w-full px-4 py-6 max-w-4xl mx-auto space-y-6">
       {/* Perfil */}
-      <div className="card-bg rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 shadow min-h-[120px] text-center md:text-left">
+      <div
+        onClick={() => navigate('/profile')}
+        className="card-bg rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 shadow min-h-[120px] text-center md:text-left cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
+      >
         <img
           src={user.avatar}
           alt="Foto de perfil"

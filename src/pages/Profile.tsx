@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@components/ui/accordion'
+import { useState } from 'react'
 
 const Profile = () => {
   const user = {
@@ -19,16 +20,23 @@ const Profile = () => {
     },
   }
 
+  const [zoomed, setZoomed] = useState(false)
+
   return (
-    <div className="min-h-screen pt-20 px-4 text-gray-900 dark:text-white">
+    <div className="min-h-screen pt-20 px-4 text-gray-900 dark:text-white relative">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Card principal con foto */}
         <div className="relative card-bg rounded-2xl p-6 text-center shadow-xl pt-20">
-          <img
-            src={user.photoUrl}
-            alt="Foto de perfil"
-            className="w-28 h-28 rounded-full object-cover border-4 border-white dark:border-gray-700 absolute left-1/2 -translate-x-1/2 -top-14 shadow-md"
-          />
+          <div
+            onClick={() => setZoomed(true)}
+            className="absolute left-1/2 -translate-x-1/2 -top-14 w-28 h-28 rounded-full border-4 border-white dark:border-gray-700 shadow-md cursor-pointer"
+          >
+            <img
+              src={user.photoUrl}
+              alt="Foto de perfil"
+              className="w-full h-full object-cover rounded-full"
+            />
+          </div>
           <h2 className="text-xl font-semibold mt-4">{user.name}</h2>
           <p className="text-gray-500 dark:text-gray-400">{user.position}</p>
         </div>
@@ -68,6 +76,20 @@ const Profile = () => {
           </AccordionItem>
         </Accordion>
       </div>
+
+      {/* Modal de imagen ampliada */}
+      {zoomed && (
+        <div
+          onClick={() => setZoomed(false)}
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center"
+        >
+          <img
+            src={user.photoUrl}
+            alt="Foto ampliada"
+            className="rounded-full w-72 h-72 md:w-96 md:h-96 object-cover border-4 border-white shadow-lg cursor-pointer transition-transform duration-300"
+          />
+        </div>
+      )}
     </div>
   )
 }
