@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuthStore } from "@store/authStore";
 import { useAttendanceStore } from "@store/attendanceStore";
 
@@ -31,6 +31,12 @@ const CheckOutCard = () => {
 
   const handleCheckOut = () => {
     if (!user) return;
+
+    if (time) {
+      const confirmRepeat = confirm("Ya registraste tu salida. ¿Deseas volver a marcar?");
+      if (!confirmRepeat) return;
+    }
+
     const now = new Date();
     const raw = getRawTime();
     const formatted = formatTime(now);
@@ -57,19 +63,23 @@ const CheckOutCard = () => {
   return (
     <div
       onClick={handleCheckOut}
-      className={`card-bg rounded-2xl shadow p-4 cursor-pointer transition flex flex-col items-center justify-center h-32 w-full
-        ${isMarked ? "border-2 border-pink-500" : "hover:ring-2 hover:ring-blue-500"}`}
+      className={`card-bg rounded-2xl shadow-md transition-transform p-4 cursor-pointer flex flex-col items-center justify-center h-36 w-full
+        ${isMarked ? "border-2 border-pink-500" : "hover:ring-2 hover:ring-pink-300 hover:scale-[1.02]"}`}
     >
-      <div className="flex items-center justify-between w-full text-xs text-black dark:text-white font-semibold">
+      <div className="flex items-center justify-between w-full text-xs font-semibold text-black dark:text-white">
         <span>CHECK-OUT</span>
-        <ArrowUpRight
-          size={16}
-          className="text-gray-400 hover:text-blue-500 transition rotate-180"
-        />
+        <LogOut className="text-pink-500 rotate-180" size={16} />
       </div>
+
       <div className="text-2xl font-bold text-black dark:text-white mt-2">
-        {time ? time : "--:--"}
+        {time || "--:--"}
       </div>
+
+      {isMarked && (
+        <p className="text-[11px] text-gray-400 italic mt-1 text-center leading-tight">
+          Último registro: {time}
+        </p>
+      )}
     </div>
   );
 };
