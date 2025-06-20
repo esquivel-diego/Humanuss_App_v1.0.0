@@ -152,7 +152,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
         >
           <LogOut size={18} />
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span>Cerrar sesión</span>}
         </button>
 
         <hr className="border-t border-gray-200 dark:border-gray-700 mb-2" />
