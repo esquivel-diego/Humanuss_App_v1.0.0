@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import DateRangeModal from '@components/modals/DateRangeModal'
+import { createRequest } from '@services/requestService'
+import { useNotificationStore } from '@store/notificationStore'
+import { useAuthStore } from '@store/authStore'
 
 const AbsenceRequest = () => {
   const [requestDate, setRequestDate] = useState('')
@@ -6,14 +10,36 @@ const AbsenceRequest = () => {
   const [dates, setDates] = useState('')
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
+  const user = useAuthStore.getState().user
+  const { addNotification } = useNotificationStore()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!requestDate || !absenceType || !dates) {
+    if (!user || !user.id || !requestDate || !absenceType || !dates) {
       alert('Completa todos los campos obligatorios.')
       return
     }
+
+    // Crear solicitud
+    await createRequest({
+      userId: user.id,
+      name: user.name,
+      type: 'Permiso',
+      date: requestDate,
+      range: dates,
+      status: 'pendiente',
+      notes,
+    })
+
+    // Notificación
+    addNotification({
+      userId: user.id,
+      message: 'Tu solicitud de ausencia fue enviada y está pendiente de aprobación.',
+      date: new Date().toISOString(),
+      read: false,
+    })
 
     setSubmitted(true)
     setTimeout(() => setSubmitted(false), 5000)
@@ -37,7 +63,6 @@ const AbsenceRequest = () => {
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="flex flex-col justify-between flex-1 mt-6">
             <div className="space-y-4">
-              {/* Fecha de solicitud */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Fecha de solicitud
@@ -51,7 +76,6 @@ const AbsenceRequest = () => {
                 />
               </div>
 
-              {/* Tipo de ausencia */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Tipo de ausencia
@@ -66,7 +90,6 @@ const AbsenceRequest = () => {
                 />
               </div>
 
-              {/* Fechas */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Fechas
@@ -74,14 +97,21 @@ const AbsenceRequest = () => {
                 <input
                   type="text"
                   value={dates}
-                  onChange={(e) => setDates(e.target.value)}
+                  onClick={() => setShowCalendar(true)}
+                  readOnly
                   placeholder="Ej. del 10 al 15 de agosto"
-                  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
+                  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none cursor-pointer"
                   required
                 />
               </div>
 
-              {/* Observaciones */}
+              {/* Modal del calendario */}
+              <DateRangeModal
+                isOpen={showCalendar}
+                onClose={() => setShowCalendar(false)}
+                onSelectRange={(range) => setDates(range)}
+              />
+
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Observaciones

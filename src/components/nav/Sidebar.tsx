@@ -51,7 +51,7 @@ const Sidebar = () => {
 
   const mainMenu: MenuItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-    { path: '/settings', label: 'Settings', icon: <Settings size={18} /> },
+    { path: '/settings', label: 'Configuración', icon: <Settings size={18} /> },
     {
       path: '/notificaciones',
       label: 'Notificaciones',
@@ -64,7 +64,7 @@ const Sidebar = () => {
         </div>
       )
     },
-    { label: 'Modules', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
+    { label: 'Modulos', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
   ]
 
   if (user?.role === 'admin') {
@@ -75,15 +75,15 @@ const Sidebar = () => {
   }
 
   const moduleMenu: MenuItem[] = [
-    { label: 'Back', icon: <ArrowLeft size={18} />, action: () => setActiveMenu('main'), isPrimary: true },
-    { path: '/modules/vacaciones', label: 'Leave Request', icon: <Plane size={18} /> },
-    { path: '/modules/ausencias', label: 'Absences', icon: <CalendarX size={18} /> },
-    { label: 'HR Requests', icon: <FileText size={18} />, action: () => setActiveMenu('rrhh') },
-    { path: '/modules/novedades', label: 'News', icon: <Megaphone size={18} /> }
+    { label: 'Atrás', icon: <ArrowLeft size={18} />, action: () => setActiveMenu('main'), isPrimary: true },
+    { path: '/modules/vacaciones', label: 'Vacaciones', icon: <Plane size={18} /> },
+    { path: '/modules/ausencias', label: 'Ausencias', icon: <CalendarX size={18} /> },
+    { label: 'Solicitudes RRHH', icon: <FileText size={18} />, action: () => setActiveMenu('rrhh') },
+    { path: '/modules/novedades', label: 'Noticias', icon: <Megaphone size={18} /> }
   ]
 
   const rrhhMenu: MenuItem[] = [
-    { label: 'Back', icon: <ArrowLeft size={18} />, action: () => setActiveMenu('modules'), isPrimary: true },
+    { label: 'Atrás', icon: <ArrowLeft size={18} />, action: () => setActiveMenu('modules'), isPrimary: true },
     { path: '/modules/rrhh/work-certificate', label: 'Work Certificate', icon: <FileText size={18} /> },
     { path: '/modules/rrhh/income-certification', label: 'Income Certification', icon: <FileText size={18} /> }
   ]
