@@ -58,7 +58,7 @@ const CheckOutCard = () => {
     <div
       onClick={handleCheckOut}
       className={`card-bg rounded-2xl shadow p-4 cursor-pointer transition flex flex-col items-center justify-center h-32 w-full
-        ${isMarked ? "border-4 border-pink-500" : "hover:ring-2 hover:ring-blue-500"}`}
+        ${isMarked ? "border-2 border-pink-500" : "hover:ring-2 hover:ring-blue-500"}`}
     >
       <div className="flex items-center justify-between w-full text-xs text-black dark:text-white font-semibold">
         <span>CHECK-OUT</span>
