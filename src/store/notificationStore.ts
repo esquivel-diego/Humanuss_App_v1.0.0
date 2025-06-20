@@ -7,6 +7,7 @@ export type Notification = {
   message: string
   date: string
   read: boolean
+    link?: string
 }
 
 type NotificationStore = {

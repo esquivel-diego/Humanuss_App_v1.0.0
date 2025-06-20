@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNewsStore } from '@store/newsStore'
+import { useNotificationStore } from '@store/notificationStore'
+import users from '@mocks/users.json'
 
 const AdminNews = () => {
   const [title, setTitle] = useState('')
@@ -7,6 +9,7 @@ const AdminNews = () => {
   const [submitted, setSubmitted] = useState(false)
 
   const { news, addNews, loadFromStorage } = useNewsStore()
+  const { addNotification } = useNotificationStore()
 
   useEffect(() => {
     loadFromStorage()
@@ -20,10 +23,25 @@ const AdminNews = () => {
       return
     }
 
+    // Crear noticia (sin pasar id ni date, el store lo maneja)
     addNews({ title, content })
+
+    // Generar un ID manualmente para vincular notificaciones
+    const simulatedId = Date.now()
+
+    // Enviar notificación a todos los usuarios con link estimado
+    users.forEach((user) => {
+      addNotification({
+        userId: user.id,
+        message: `📰 Nueva noticia publicada: "${title}"`,
+        date: new Date().toISOString(),
+        read: false,
+        link: `/novedades/${simulatedId}`,
+      })
+    })
+
     setSubmitted(true)
     setTimeout(() => setSubmitted(false), 3000)
-
     setTitle('')
     setContent('')
   }
