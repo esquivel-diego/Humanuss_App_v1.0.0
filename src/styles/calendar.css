@@ -1,31 +1,95 @@
-.react-calendar {
-    @apply w-full text-sm bg-white dark:bg-gray-900 text-black dark:text-white rounded-md p-4;
+/* Estilos personalizados para react-date-range */
+
+/* Envoltura general del calendario */
+.rdrCalendarWrapper {
+  background-color: var(--calendar-bg) !important;
+  color: var(--calendar-text) !important;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
 }
 
-.react-calendar__navigation button {
-    @apply bg-transparent text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600;
+/* Contenedor de los meses */
+.rdrMonthsHorizontal,
+.rdrMonths,
+.rdrMonth {
+  background-color: var(--calendar-bg) !important;
 }
 
-.react-calendar__tile {
-    @apply rounded-md px-2 py-1 text-center hover:bg-blue-100 dark:hover:bg-gray-700;
+/* Día normal */
+.rdrDay {
+  background-color: transparent !important;
+  color: var(--calendar-text) !important;
+  border-radius: 0.375rem;
+  transition: background 0.2s;
 }
 
-.react-calendar__tile--now {
-    @apply bg-blue-100 dark:bg-gray-700 text-blue-600;
+/* Día seleccionado o en hover */
+.rdrInRange,
+.rdrStartEdge,
+.rdrEndEdge,
+.rdrDayHovered,
+.rdrDayStartPreview,
+.rdrDayEndPreview {
+  background-color: var(--calendar-primary) !important;
+  color: #fff !important;
 }
 
-.react-calendar__tile--active {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
+/* Números del día: color base */
+.rdrDayNumber span {
+  color: var(--calendar-text) !important;
+  transition: color 0.2s ease;
 }
 
-.react-calendar__month-view__weekdays {
-    @apply text-gray-400 dark:text-gray-500 uppercase;
+/* Días fuera del mes actual */
+.rdrDayPassive .rdrDayNumber span {
+  color: rgba(var(--calendar-text-rgb), 0.3) !important;
 }
 
-.react-calendar__month-view__days {
-    @apply grid grid-cols-7 gap-1;
+/* Encabezado de mes y días de la semana */
+.rdrMonthName,
+.rdrWeekDay {
+  color: var(--calendar-text) !important;
 }
 
-.react-calendar__tile--hasActive {
-    @apply bg-blue-600 text-white;
+/* Select de mes/año */
+.rdrMonthAndYearPickers select {
+  background-color: var(--calendar-bg) !important;
+  color: var(--calendar-text) !important;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  padding: 0.25rem;
+}
+
+/* Contenedor que muestra las fechas seleccionadas */
+.rdrDateDisplayWrapper {
+  background-color: var(--calendar-bg) !important;
+  border: none !important;
+}
+
+/* Estilo de cada campo de fecha */
+.rdrDateDisplayItem {
+  background-color: var(--calendar-bg) !important;
+  color: var(--calendar-text) !important;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+/* Input del campo de fecha */
+.rdrDateDisplayItem input {
+  background-color: transparent !important;
+  color: var(--calendar-text) !important;
+}
+
+/* ✅ Forzar número blanco cuando el día tiene fondo azul (selección de rango) */
+.rdrDay:not(.rdrPassive) div[style*="background-color"] .rdrDayNumber span {
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+/* Solo en modo claro: si el día tiene fondo azul (por selección), forzar número blanco */
+:root .rdrDay:not(.rdrPassive) div[style*="background-color"] .rdrDayNumber span {
+  color: #ffffff !important;
+  font-weight: 500;
 }

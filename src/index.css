@@ -36,11 +36,17 @@ body,
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* Calendario personalizado */
+    --calendar-bg: #ffffff;
+  --calendar-text: #1f2937;
+  --calendar-text-rgb: 31, 41, 55;
+  --calendar-primary: #2563eb;
   }
 
   .dark {
     /* Modo oscuro */
-    --background: #0f172a; /* Azul oscuro exacto */
+    --background: #0f172a;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -64,6 +70,12 @@ body,
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Calendario personalizado (oscuro) */
+    --calendar-bg: #1e293b;
+  --calendar-text: #f3f4f6;
+  --calendar-text-rgb: 243, 244, 246;
+  --calendar-primary: #3b82f6;
   }
 
   * {
@@ -79,25 +91,24 @@ body,
 
   body {
     @apply text-foreground;
-    background: var(--background); /* Aplica gradiente o azul según tema */
+    background: var(--background);
   }
 }
 
 @layer components {
   .sidebar-bg {
-    background: linear-gradient(to bottom, #BEC4D9, #92A1C3); /* Claro */
+    background: linear-gradient(to bottom, #BEC4D9, #92A1C3);
   }
 
   .dark .sidebar-bg {
-    background-color: #0f172a; /* Oscuro exacto */
+    background-color: #0f172a;
   }
 
   .card-bg {
-  background-color: var(--card);
-}
+    background-color: var(--card);
+  }
 
-.dark .card-bg {
-  background-color: theme('colors.gray.800'); /* mantiene bg-gray-800 */
-}
-
+  .dark .card-bg {
+    background-color: theme('colors.gray.800');
+  }
 }

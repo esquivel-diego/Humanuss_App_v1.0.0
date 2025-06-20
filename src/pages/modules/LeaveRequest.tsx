@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import DateRangeModal from '@components/modals/DateRangeModal' // ajusta la ruta si no usas alias
 
 const LeaveRequest = () => {
   const [requestDate, setRequestDate] = useState('')
@@ -6,6 +7,7 @@ const LeaveRequest = () => {
   const [dates, setDates] = useState('')
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,12 +76,20 @@ const LeaveRequest = () => {
                 <input
                   type="text"
                   value={dates}
-                  onChange={(e) => setDates(e.target.value)}
+                  onClick={() => setShowCalendar(true)}
+                  readOnly
                   placeholder="Ej. del 5 al 10 de julio"
-                  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
+                  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none cursor-pointer"
                   required
                 />
               </div>
+
+              {/* Modal de selección de rango */}
+              <DateRangeModal
+                isOpen={showCalendar}
+                onClose={() => setShowCalendar(false)}
+                onSelectRange={(range) => setDates(range)}
+              />
 
               {/* Días disponibles / Días a gozar */}
               <div className="flex gap-2">
