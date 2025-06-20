@@ -14,6 +14,7 @@ type NotificationStore = {
   addNotification: (n: Omit<Notification, 'id'>) => void
   markAsRead: (id: number) => void
   loadFromStorage: () => void
+  clearNotifications: () => void // opcional
 }
 
 const STORAGE_KEY = 'notifications'
@@ -22,7 +23,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
 
   addNotification: (n) => {
-    const existing = get().notifications
+    const storedRaw = localStorage.getItem(STORAGE_KEY)
+    const existing: Notification[] = storedRaw ? JSON.parse(storedRaw) : []
     const newNotification = { ...n, id: Date.now() }
     const updated = [...existing, newNotification]
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
@@ -42,5 +44,10 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     if (raw) {
       set({ notifications: JSON.parse(raw) })
     }
-  }
+  },
+
+  clearNotifications: () => {
+    localStorage.removeItem(STORAGE_KEY)
+    set({ notifications: [] })
+  },
 }))

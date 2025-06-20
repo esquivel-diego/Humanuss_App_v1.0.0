@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import DateRangeModal from '@components/modals/DateRangeModal' // ajusta la ruta si no usas alias
+import DateRangeModal from '@components/modals/DateRangeModal'
+import { createRequest } from '@services/requestService'
+import { useNotificationStore } from '@store/notificationStore'
+import { useAuthStore } from '@store/authStore'
 
 const LeaveRequest = () => {
   const [requestDate, setRequestDate] = useState('')
@@ -8,14 +11,35 @@ const LeaveRequest = () => {
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
+  const user = useAuthStore.getState().user
+  const { addNotification } = useNotificationStore()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!requestDate || !absenceType || !dates) {
+    if (!user || !user.id || !requestDate || !absenceType || !dates) {
       alert('Completa todos los campos obligatorios.')
       return
     }
+
+    // Crear solicitud
+    await createRequest({
+      userId: user.id,
+      name: user.name,
+      type: 'Vacación',
+      date: requestDate,
+      range: dates,
+      status: 'pendiente',
+      notes,
+    })
+
+    // Notificación
+    addNotification({
+      userId: user.id,
+      message: 'Tu solicitud de vacaciones fue enviada y está pendiente de aprobación.',
+      date: new Date().toISOString(),
+      read: false,
+    })
 
     setSubmitted(true)
     setTimeout(() => setSubmitted(false), 5000)
@@ -29,17 +53,13 @@ const LeaveRequest = () => {
   return (
     <div className="min-h-screen text-gray-800 dark:text-white p-6">
       <div className="w-full max-w-5xl mx-auto flex flex-col justify-center">
-        {/* Card contenedor con fondo neumórfico */}
         <div className="card-bg flex flex-col flex-1 rounded-2xl shadow-xl p-6 pt-10">
-          {/* Título */}
           <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow text-center">
             Solicitud de vacaciones
           </div>
 
-          {/* Formulario */}
           <form onSubmit={handleSubmit} className="flex flex-col justify-between flex-1 mt-6">
             <div className="space-y-4">
-              {/* Fecha de solicitud */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Fecha de solicitud
@@ -53,7 +73,6 @@ const LeaveRequest = () => {
                 />
               </div>
 
-              {/* Periodo que afecta */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Periodo que afecta
@@ -68,7 +87,6 @@ const LeaveRequest = () => {
                 />
               </div>
 
-              {/* Fechas */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Fechas
@@ -84,14 +102,12 @@ const LeaveRequest = () => {
                 />
               </div>
 
-              {/* Modal de selección de rango */}
               <DateRangeModal
                 isOpen={showCalendar}
                 onClose={() => setShowCalendar(false)}
                 onSelectRange={(range) => setDates(range)}
               />
 
-              {/* Días disponibles / Días a gozar */}
               <div className="flex gap-2">
                 <div className="flex-1">
                   <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
@@ -115,7 +131,6 @@ const LeaveRequest = () => {
                 </div>
               </div>
 
-              {/* Observaciones */}
               <div>
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Observaciones
@@ -129,7 +144,6 @@ const LeaveRequest = () => {
               </div>
             </div>
 
-            {/* Botón */}
             <div className="pt-6">
               <div className="max-w-md mx-auto w-full">
                 <button
