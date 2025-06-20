@@ -36,7 +36,7 @@ const Dashboard = () => {
         </div>
         <img
           onClick={() => navigate('/profile')}
-          src="src/assets/logo.svg"
+          src="src/assets/perfil.png"
           alt="Foto de perfil"
           className="w-14 h-14 rounded-full object-cover shadow-md cursor-pointer hover:brightness-110 transition"
         />

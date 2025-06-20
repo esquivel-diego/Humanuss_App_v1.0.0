@@ -3,7 +3,7 @@
     "userId": 1,
     "name": "Diego Esquivel",
     "position": "Desarrollador de software",
-    "photoUrl": "https://i.pravatar.cc/300?u=diego",
+    "photoUrl": "/assets/perfil.png",
     "contact": {
       "address": "Edificio Campus Tec I Vía 4 1-00 Ciudad de Guatemala",
       "phone": "5555 - 5555",
