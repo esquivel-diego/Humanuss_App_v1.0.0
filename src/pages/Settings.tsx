@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@hooks/useTheme'
 import ChangePasswordModal from '@components/modals/ChangePasswordModal'
 import { useAuthStore } from '@store/authStore'
-import rawProfileData from '@mocks/profile.json'
 
 interface ContactInfo {
   address: string
@@ -14,7 +13,7 @@ interface ContactInfo {
 }
 
 interface UserProfile {
-  userId: number
+  userId: string
   name: string
   position: string
   photoUrl: string
@@ -26,22 +25,51 @@ const Settings = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
-
   const [profile, setProfile] = useState<UserProfile | null>(null)
 
   useEffect(() => {
-    if (user) {
-      const profiles = Array.isArray(rawProfileData) ? rawProfileData : []
-      const found = profiles.find((p) => p.userId === user.id)
-      setProfile(found || null)
+    const fetchProfile = async () => {
+      if (!user) return
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/empleado/${user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        )
+        const data = await res.json()
+        const raw = data?.recordset?.[0]
+        if (!raw) return
+
+        const parsed: UserProfile = {
+          userId: raw.EMPLEADO_ID,
+          name: raw.NOMBRE,
+          position: raw.PUESTO,
+          photoUrl: raw.FOTO_URL || '/default-avatar.png',
+          contact: {
+            address: raw.DIRECCION,
+            phone: raw.TELEFONO_RESIDENCIAL,
+            mobile: raw.TELEFONO_MOVIL,
+            email: raw.CORREO_ELECTRONICO,
+            startDate: raw.FECHA_INGRESO,
+          },
+        }
+
+        setProfile(parsed)
+      } catch (err) {
+        console.error('Error al cargar perfil:', err)
+      }
     }
+
+    fetchProfile()
   }, [user])
 
   if (!user || !profile) return null
 
   return (
     <div className="w-full px-4 py-6 max-w-4xl mx-auto space-y-6">
-      {/* Perfil */}
       <div
         onClick={() => navigate('/profile')}
         className="card-bg rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 shadow min-h-[120px] text-center md:text-left cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
@@ -58,7 +86,6 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Cambiar contraseña */}
       <button
         onClick={() => setModalOpen(true)}
         className="card-bg w-full flex justify-between items-center px-4 py-3 rounded-xl shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition"
@@ -67,7 +94,6 @@ const Settings = () => {
         <span className="text-xl">›</span>
       </button>
 
-      {/* Modo oscuro */}
       <div className="card-bg flex justify-between items-center px-4 py-3 rounded-xl shadow">
         <span className="text-sm font-medium">Dark mode</span>
         <label className="inline-flex items-center cursor-pointer">
@@ -87,7 +113,6 @@ const Settings = () => {
         </label>
       </div>
 
-      {/* Modal */}
       <ChangePasswordModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   )

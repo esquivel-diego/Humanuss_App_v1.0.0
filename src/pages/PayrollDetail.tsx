@@ -1,22 +1,30 @@
+import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { useAuthStore } from "@store/authStore"
-import payrollData from "@mocks/payroll.json"
-import type { PayrollEntry } from '../types/payroll'
-
-
+import { getPayrollForUser } from "@services/payrollService"
+import type { PayrollPayment } from "@services/payrollService"
 
 const PayrollDetail = () => {
   const { index } = useParams()
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
-  const paymentIndex = Number(index)
+  const [payment, setPayment] = useState<PayrollPayment | null>(null)
 
-  const userData = (payrollData as PayrollEntry[]).find(
-    (entry) => entry.userId === user?.id
-  )
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user || index === undefined) return
+      try {
+        const all = await getPayrollForUser(user)
+        const target = all[Number(index)]
+        if (target) setPayment(target)
+      } catch (err) {
+        console.error("Error al cargar detalle de boleta:", err)
+      }
+    }
 
-  const payment = userData?.payments?.[paymentIndex]
+    fetchData()
+  }, [user, index])
 
   if (!payment) {
     return (
@@ -47,7 +55,6 @@ const PayrollDetail = () => {
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-white p-6 relative">
-      {/* Botón flotante */}
       <button
         onClick={() => navigate("/payroll")}
         className="fixed bottom-4 right-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"

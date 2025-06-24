@@ -1,39 +1,42 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@store/authStore';
-import data from '@mocks/days.json';
-
-interface Request {
-  date: string;
-  type: string;
-  status: string;
-}
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@store/authStore'
+import { getAllRequests } from '@services/requestService'
+import type { Request } from '@services/requestService'
 
 const DaysCard = () => {
-  const totalDays = 15;
-  const [availableDays, setAvailableDays] = useState<number>(totalDays);
-  const [requests, setRequests] = useState<Request[]>([]);
-  const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
+  const totalDays = 15
+  const [availableDays, setAvailableDays] = useState<number>(totalDays)
+  const [requests, setRequests] = useState<Request[]>([])
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
 
   useEffect(() => {
-    const userData = data.find((d) => d.userId === user?.id);
-    if (userData) {
-      const approvedRequests = userData.requests.filter(
-        (req: Request) =>
-          req.status.toLowerCase() === 'aprobado' &&
-          (req.type === 'Vacación' || req.type === 'Permiso')
-      );
+    const fetchData = async () => {
+      if (!user) return
 
-      setRequests(userData.requests);
-      setAvailableDays(totalDays - approvedRequests.length);
+      try {
+        const all = await getAllRequests(user.token, user.id)
+        const approved = all.filter(
+          (r) =>
+            r.status.toLowerCase() === 'aprobada' &&
+            (r.type === 'Vacación' || r.type === 'Permiso')
+        )
+
+        setRequests(all)
+        setAvailableDays(totalDays - approved.length)
+      } catch (error) {
+        console.error('Error al cargar solicitudes:', error)
+      }
     }
-  }, [user]);
 
-  const takenDays = totalDays - availableDays;
-  const lastStatus = requests[0]?.status || 'N/A';
+    fetchData()
+  }, [user])
+
+  const takenDays = totalDays - availableDays
+  const lastStatus = requests[0]?.status || 'N/A'
   const isApproved =
-    lastStatus.toLowerCase() === 'aprobado' || lastStatus.toLowerCase() === 'approved';
+    lastStatus.toLowerCase() === 'aprobada' || lastStatus.toLowerCase() === 'approved'
 
   return (
     <div
@@ -76,7 +79,7 @@ const DaysCard = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DaysCard;
+export default DaysCard

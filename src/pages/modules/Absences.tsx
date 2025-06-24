@@ -11,6 +11,7 @@ const AbsenceRequest = () => {
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
+
   const user = useAuthStore.getState().user
   const { addNotification } = useNotificationStore()
 
@@ -22,45 +23,41 @@ const AbsenceRequest = () => {
       return
     }
 
-    // Crear solicitud
-    await createRequest({
-      userId: user.id,
-      name: user.name,
-      type: 'Permiso',
-      date: requestDate,
-      range: dates,
-      status: 'pendiente',
-      notes,
-    })
+    try {
+      await createRequest(user, {
+        type: 'Permiso',
+        date: requestDate,
+        range: dates,
+        notes
+      })
 
-    // Notificación
-    addNotification({
-      userId: user.id,
-      message: 'Tu solicitud de ausencia fue enviada y está pendiente de aprobación.',
-      date: new Date().toISOString(),
-      read: false,
-    })
+      addNotification({
+        userId: user.id, // string desde authStore
+        message: 'Tu solicitud de ausencia fue enviada y está pendiente de aprobación.',
+        date: new Date().toISOString(),
+        read: false
+      })
 
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 5000)
-
-    setRequestDate('')
-    setAbsenceType('')
-    setDates('')
-    setNotes('')
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 5000)
+      setRequestDate('')
+      setAbsenceType('')
+      setDates('')
+      setNotes('')
+    } catch (error) {
+      alert('❌ Hubo un error al enviar la solicitud.')
+      console.error(error)
+    }
   }
 
   return (
     <div className="min-h-screen text-gray-800 dark:text-white p-6">
       <div className="w-full max-w-5xl mx-auto flex flex-col justify-center">
-        {/* Card contenedor con fondo estilizado */}
         <div className="card-bg flex flex-col flex-1 rounded-2xl shadow-xl p-6 pt-10">
-          {/* Título */}
           <div className="bg-blue-900 text-white text-lg font-semibold px-6 py-4 rounded-2xl shadow text-center">
             Solicitud de ausencia
           </div>
 
-          {/* Formulario */}
           <form onSubmit={handleSubmit} className="flex flex-col justify-between flex-1 mt-6">
             <div className="space-y-4">
               <div>
@@ -105,7 +102,6 @@ const AbsenceRequest = () => {
                 />
               </div>
 
-              {/* Modal del calendario */}
               <DateRangeModal
                 isOpen={showCalendar}
                 onClose={() => setShowCalendar(false)}
@@ -125,7 +121,6 @@ const AbsenceRequest = () => {
               </div>
             </div>
 
-            {/* Botón */}
             <div className="pt-6">
               <div className="max-w-md mx-auto w-full">
                 <button

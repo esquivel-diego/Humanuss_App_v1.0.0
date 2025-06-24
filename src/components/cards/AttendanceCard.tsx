@@ -11,22 +11,12 @@ import type { RectangleProps } from "recharts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@store/authStore";
-import { useAttendanceStore } from "@store/attendanceStore";
-import attendanceData from "@mocks/attendance.json";
+import { getWeeklyAttendance } from "@services/attendanceService"; // ✅ función real
 
 interface AttendanceBar {
   name: string;
   minutes: number;
   label: string;
-}
-
-interface AttendanceEntry {
-  userId: number;
-  week: {
-    day: string;
-    checkIn: string;
-    checkOut: string;
-  }[];
 }
 
 const AttendanceCard = () => {
@@ -37,8 +27,6 @@ const AttendanceCard = () => {
 
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const getWeek = useAttendanceStore((state) => state.getWeek);
-  const week = user ? getWeek(user.id) : [];
 
   const parseToMinutes = (time: string) => {
     const [h, m] = time.split(":").map(Number);
@@ -67,49 +55,35 @@ const AttendanceCard = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
+    const fetchData = async () => {
+      if (!user) return;
 
-    const userData = (attendanceData as AttendanceEntry[]).find(
-      (entry) => entry.userId === user.id
-    );
-    if (!userData) return;
+      try {
+        const attendance = await getWeeklyAttendance(user);
+        const checkIns = attendance.map((d) => parseToMinutes(d.checkIn));
+        const adjustedMin = Math.min(...checkIns) - 15;
+        const adjustedMax = Math.max(...checkIns);
 
-    const today = new Intl.DateTimeFormat("es-ES", {
-      weekday: "long",
-    })
-      .format(new Date())
-      .replace(/^\w/, (c) => c.toUpperCase());
+        const parsed: AttendanceBar[] = attendance.map((d) => ({
+          name: d.day.slice(0, 3),
+          minutes: parseToMinutes(d.checkIn),
+          label: d.checkIn,
+        }));
 
-    const mergedWeek = userData.week.map((d) => {
-      if (d.day === today) {
-        const overrideDay = week.find((o) => o.day === d.day);
-        return {
-          ...d,
-          checkIn: overrideDay?.checkIn || d.checkIn,
-        };
+        const avg = Math.round(
+          checkIns.reduce((a, b) => a + b, 0) / checkIns.length
+        );
+        setAvgTime(formatHour(avg));
+        setChartData(parsed);
+        setMin(adjustedMin);
+        setMax(adjustedMax);
+      } catch (err) {
+        console.error("Error al cargar asistencia:", err);
       }
-      return d;
-    });
+    };
 
-    const checkIns = mergedWeek.map((d) => parseToMinutes(d.checkIn));
-    const adjustedMin = Math.min(...checkIns) - 15;
-    const adjustedMax = Math.max(...checkIns);
-
-    const parsed: AttendanceBar[] = mergedWeek.map((d) => {
-      const m = parseToMinutes(d.checkIn);
-      return {
-        name: d.day.slice(0, 3),
-        minutes: m,
-        label: d.checkIn,
-      };
-    });
-
-    const avg = Math.round(checkIns.reduce((a, b) => a + b, 0) / checkIns.length);
-    setAvgTime(formatHour(avg));
-    setChartData(parsed);
-    setMin(adjustedMin);
-    setMax(adjustedMax);
-  }, [user, week]); // ✅ reacciona a cambios reales, sin warning
+    fetchData();
+  }, [user]);
 
   return (
     <div
@@ -154,10 +128,7 @@ const AttendanceCard = () => {
                 activeBar={false}
               >
                 {chartData.map((_, i) => (
-                  <Cell
-                    key={i}
-                    fill={i % 2 === 0 ? "#3b82f6" : "#ec4899"}
-                  />
+                  <Cell key={i} fill={i % 2 === 0 ? "#3b82f6" : "#ec4899"} />
                 ))}
               </Bar>
             </BarChart>

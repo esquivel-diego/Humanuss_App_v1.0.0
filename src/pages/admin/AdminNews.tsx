@@ -1,49 +1,66 @@
 import { useState, useEffect } from 'react'
-import { useNewsStore } from '@store/newsStore'
+import { createNews, fetchNews } from '@services/newsService'
 import { useNotificationStore } from '@store/notificationStore'
-import users from '@mocks/users.json'
+import { useAuthStore } from '@store/authStore'
+
+type NewsItem = {
+  id: number
+  title: string
+  content: string
+  date: string
+}
 
 const AdminNews = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [newsList, setNewsList] = useState<NewsItem[]>([])
 
-  const { news, addNews, loadFromStorage } = useNewsStore()
   const { addNotification } = useNotificationStore()
+  const user = useAuthStore.getState().user
 
   useEffect(() => {
-    loadFromStorage()
+    const loadNews = async () => {
+      try {
+        const all = await fetchNews()
+        setNewsList(all)
+      } catch (err) {
+        console.error('Error al cargar noticias:', err)
+      }
+    }
+    loadNews()
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!title.trim() || !content.trim()) {
       alert('Por favor completa todos los campos.')
       return
     }
 
-    // Crear noticia (sin pasar id ni date, el store lo maneja)
-    addNews({ title, content })
+    try {
+      const newItem = await createNews(title, content)
+      setNewsList((prev) => [...prev, newItem])
 
-    // Generar un ID manualmente para vincular notificaciones
-    const simulatedId = Date.now()
+      // Notificación local para el usuario actual (puedes extender esto en el futuro a todos)
+      if (user) {
+        addNotification({
+          userId: user.id,
+          message: `📰 Nueva noticia publicada: "${title}"`,
+          date: new Date().toISOString(),
+          read: false,
+          link: `/novedades/${newItem.id}`,
+        })
+      }
 
-    // Enviar notificación a todos los usuarios con link estimado
-    users.forEach((user) => {
-      addNotification({
-        userId: user.id,
-        message: `📰 Nueva noticia publicada: "${title}"`,
-        date: new Date().toISOString(),
-        read: false,
-        link: `/novedades/${simulatedId}`,
-      })
-    })
-
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 3000)
-    setTitle('')
-    setContent('')
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 3000)
+      setTitle('')
+      setContent('')
+    } catch (err) {
+      console.error('Error al publicar noticia:', err)
+      alert('Hubo un error al publicar la noticia.')
+    }
   }
 
   return (
@@ -53,7 +70,6 @@ const AdminNews = () => {
         Crea y publica anuncios internos visibles para todos los colaboradores.
       </p>
 
-      {/* Formulario */}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
           <label className="block text-sm font-semibold mb-1">Título</label>
@@ -88,12 +104,11 @@ const AdminNews = () => {
         )}
       </form>
 
-      {/* Lista de noticias existentes */}
-      {news.length > 0 && (
+      {newsList.length > 0 && (
         <div className="mt-10 max-w-3xl">
           <h2 className="text-lg font-bold mb-3">Noticias publicadas</h2>
           <ul className="space-y-4">
-            {news
+            {newsList
               .slice()
               .reverse()
               .map((item) => (

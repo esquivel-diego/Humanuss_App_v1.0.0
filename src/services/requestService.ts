@@ -1,10 +1,11 @@
 // src/services/requestService.ts
+import type { User } from './authService'
 
 export type RequestStatus = 'pendiente' | 'aprobada' | 'rechazada'
 
 export type Request = {
   id: number
-  userId: number
+  userId: string
   name?: string
   type: string
   date: string
@@ -13,64 +14,111 @@ export type Request = {
   status: RequestStatus
 }
 
-const STORAGE_KEY = 'hr_requests'
+const API_URL = import.meta.env.VITE_API_URL
 
 /**
- * Inicializa localStorage si está vacío (solo la primera vez)
+ * Obtiene todas las solicitudes del usuario autenticado
  */
-const initializeMockData = () => {
-  const existing = localStorage.getItem(STORAGE_KEY)
-  if (!existing) {
-    const mock: Request[] = [
-      {
-        id: 1,
-        userId: 2, // admin
-        type: 'Vacaciones',
-        date: '2025-06-20',
-        status: 'pendiente',
-      },
-      {
-        id: 2,
-        userId: 1, // Juan Pérez
-        type: 'Constancia laboral',
-        date: '2025-06-18',
-        status: 'pendiente',
-      },
-    ]
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mock))
+export const getAllRequests = async (
+  token: string,
+  empleadoId: string
+): Promise<Request[]> => {
+  const [vacaciones, ausencias] = await Promise.all([
+    fetch(`${API_URL}/empleado_vacacion/${empleadoId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+    fetch(`${API_URL}/ausencia_solicitud_movil/${empleadoId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  ])
+
+  const vacData = await vacaciones.json()
+  const ausData = await ausencias.json()
+
+  const mappedVac: Request[] = vacData.recordset.map((v: any) => ({
+    id: v.VACACION_ID,
+    userId: v.EMPLEADO_ID,
+    type: 'Vacación',
+    date: v.FECHA_SOLICITUD,
+    range: `${v.FECHA_INICIO} al ${v.FECHA_FIN}`,
+    notes: v.OBSERVACION,
+    status: v.ESTADO.toLowerCase() as RequestStatus
+  }))
+
+  const mappedAus: Request[] = ausData.recordset.map((a: any) => ({
+    id: a.AUSENCIA_ID,
+    userId: a.EMPLEADO_ID,
+    type: 'Permiso',
+    date: a.FECHA_SOLICITUD,
+    range: `${a.FECHA_INICIO} al ${a.FECHA_FIN}`,
+    notes: a.OBSERVACION,
+    status: a.ESTADO.toLowerCase() as RequestStatus
+  }))
+
+  return [...mappedVac, ...mappedAus]
+}
+
+/**
+ * Crea una nueva solicitud de vacaciones o permiso
+ */
+export const createRequest = async (
+  user: User,
+  request: {
+    type: 'Vacación' | 'Permiso'
+    date: string
+    range: string
+    notes?: string
   }
+): Promise<void> => {
+  const [start, end] = request.range.split(' al ')
+  const payload =
+    request.type === 'Vacación'
+      ? {
+          vacacion: {
+            FECHA_SOLICITUD: request.date,
+            FECHA_INICIO_SOL: start,
+            FECHA_FIN_SOL: end,
+            FECHA_LABOR_SOL: end,
+            OBSERVACIONES1: request.notes ?? '',
+            DIAS_PAGADOS_SOL: 0,
+            DIAS_GOZAR_SOL: 0,
+            DIAS_CURSO_SOL: 0
+          }
+        }
+      : {
+          ausencia: {
+            FECHA_AUSENTE_I_SOL: start,
+            FECHA_AUSENTE_F_SOL: end,
+            TIPO_SOLICITUD: 'Permiso',
+            OBSERVACIONES1: request.notes ?? ''
+          }
+        }
+
+  const endpoint =
+    request.type === 'Vacación' ? 'vacacion_solicitud' : 'ausencia_solicitud_movil'
+
+  await fetch(`${API_URL}/${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${user.token}`
+    },
+    body: JSON.stringify(payload)
+  })
 }
 
 /**
- * Obtiene todas las solicitudes desde "la API"
- */
-export const getAllRequests = (): Request[] => {
-  initializeMockData()
-  const raw = localStorage.getItem(STORAGE_KEY)
-  return raw ? JSON.parse(raw) : []
-}
-
-/**
- * Agrega una nueva solicitud
- */
-export const createRequest = (newRequest: Omit<Request, 'id'>): void => {
-  const existing = getAllRequests()
-  const nextId = existing.length > 0 ? Math.max(...existing.map(r => r.id)) + 1 : 1
-  const updated = [...existing, { ...newRequest, id: nextId }]
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-}
-
-/**
- * Actualiza el estado de una solicitud
+ * [MVP-only] Simula aprobación o rechazo en AdminRequest
  */
 export const updateRequestStatus = (
   id: number,
   newStatus: RequestStatus
 ): Request[] => {
-  const requests = getAllRequests()
-  const updated = requests.map((req) =>
-    req.id === id ? { ...req, status: newStatus } : req
+  const raw = localStorage.getItem('hr_requests') || '[]'
+  const existing = JSON.parse(raw)
+  const updated = existing.map((r: Request) =>
+    r.id === id ? { ...r, status: newStatus } : r
   )
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  localStorage.setItem('hr_requests', JSON.stringify(updated))
   return updated
 }

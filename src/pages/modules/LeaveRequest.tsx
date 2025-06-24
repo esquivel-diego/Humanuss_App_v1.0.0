@@ -11,6 +11,7 @@ const LeaveRequest = () => {
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
+
   const user = useAuthStore.getState().user
   const { addNotification } = useNotificationStore()
 
@@ -22,32 +23,32 @@ const LeaveRequest = () => {
       return
     }
 
-    // Crear solicitud
-    await createRequest({
-      userId: user.id,
-      name: user.name,
-      type: 'Vacación',
-      date: requestDate,
-      range: dates,
-      status: 'pendiente',
-      notes,
-    })
+    try {
+      await createRequest(user, {
+        type: 'Vacación',
+        date: requestDate,
+        range: dates,
+        notes,
+      })
 
-    // Notificación
-    addNotification({
-      userId: user.id,
-      message: 'Tu solicitud de vacaciones fue enviada y está pendiente de aprobación.',
-      date: new Date().toISOString(),
-      read: false,
-    })
+      addNotification({
+        userId: user.id,
+        message: 'Tu solicitud de vacaciones fue enviada y está pendiente de aprobación.',
+        date: new Date().toISOString(),
+        read: false,
+      })
 
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 5000)
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 5000)
 
-    setRequestDate('')
-    setAbsenceType('')
-    setDates('')
-    setNotes('')
+      setRequestDate('')
+      setAbsenceType('')
+      setDates('')
+      setNotes('')
+    } catch (error) {
+      console.error('Error al enviar solicitud:', error)
+      alert('❌ Ocurrió un error al enviar la solicitud.')
+    }
   }
 
   return (
@@ -61,7 +62,7 @@ const LeaveRequest = () => {
           <form onSubmit={handleSubmit} className="flex flex-col justify-between flex-1 mt-6">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
+                <label className="text-sm font-semibold block mb-1">
                   Fecha de solicitud
                 </label>
                 <input
@@ -74,7 +75,7 @@ const LeaveRequest = () => {
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
+                <label className="text-sm font-semibold block mb-1">
                   Periodo que afecta
                 </label>
                 <input
@@ -88,7 +89,7 @@ const LeaveRequest = () => {
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
+                <label className="text-sm font-semibold block mb-1">
                   Fechas
                 </label>
                 <input
@@ -110,7 +111,7 @@ const LeaveRequest = () => {
 
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
+                  <label className="text-sm font-semibold block mb-1">
                     Días disponibles
                   </label>
                   <input
@@ -120,7 +121,7 @@ const LeaveRequest = () => {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
+                  <label className="text-sm font-semibold block mb-1">
                     Días a gozar
                   </label>
                   <input
@@ -132,7 +133,7 @@ const LeaveRequest = () => {
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
+                <label className="text-sm font-semibold block mb-1">
                   Observaciones
                 </label>
                 <textarea

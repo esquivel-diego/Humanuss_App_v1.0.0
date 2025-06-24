@@ -3,11 +3,11 @@ import { create } from 'zustand'
 
 export type Notification = {
   id: number
-  userId: number
+  userId: string // ✅ cambiado de number a string
   message: string
   date: string
   read: boolean
-    link?: string
+  link?: string
 }
 
 type NotificationStore = {
@@ -15,7 +15,7 @@ type NotificationStore = {
   addNotification: (n: Omit<Notification, 'id'>) => void
   markAsRead: (id: number) => void
   loadFromStorage: () => void
-  clearNotifications: () => void // opcional
+  clearNotifications: () => void
 }
 
 const STORAGE_KEY = 'notifications'

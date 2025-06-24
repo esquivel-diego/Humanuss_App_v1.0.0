@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import { useAuthStore } from '@store/authStore'
 
 interface Props {
   open: boolean
@@ -7,15 +8,15 @@ interface Props {
 }
 
 const ChangePasswordModal = ({ open, onClose }: Props) => {
+  const user = useAuthStore((state) => state.user)
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
-
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNext, setShowNext] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (next !== confirm) {
@@ -23,11 +24,33 @@ const ChangePasswordModal = ({ open, onClose }: Props) => {
       return
     }
 
-    alert('✅ Contraseña actualizada (simulado)')
-    onClose()
-    setCurrent('')
-    setNext('')
-    setConfirm('')
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cambiar_password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify({
+          password: {
+            USER_ID: user?.username,
+            PASSWORD_ANTERIOR: current,
+            PASSWORD_NUEVO: next,
+          },
+        }),
+      })
+
+      if (!res.ok) throw new Error('Error al cambiar contraseña')
+
+      alert('✅ Contraseña actualizada correctamente.')
+      onClose()
+      setCurrent('')
+      setNext('')
+      setConfirm('')
+    } catch (err) {
+      console.error(err)
+      alert('❌ Error al cambiar contraseña. Verifica los datos.')
+    }
   }
 
   if (!open) return null
@@ -39,7 +62,6 @@ const ChangePasswordModal = ({ open, onClose }: Props) => {
           Cambiar contraseña
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Campo contraseña actual */}
           <div className="relative">
             <input
               type={showCurrent ? 'text' : 'password'}
@@ -58,7 +80,6 @@ const ChangePasswordModal = ({ open, onClose }: Props) => {
             </button>
           </div>
 
-          {/* Campo nueva contraseña */}
           <div className="relative">
             <input
               type={showNext ? 'text' : 'password'}
@@ -77,7 +98,6 @@ const ChangePasswordModal = ({ open, onClose }: Props) => {
             </button>
           </div>
 
-          {/* Campo confirmar contraseña */}
           <div className="relative">
             <input
               type={showConfirm ? 'text' : 'password'}

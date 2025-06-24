@@ -47,7 +47,9 @@ const Sidebar = () => {
     document.documentElement.classList.toggle('dark', newTheme === 'dark')
   }
 
-  const unreadCount = notifications.filter(n => !n.read && n.userId === user?.id).length
+  const unreadCount = notifications.filter(
+  (n) => !n.read && String(n.userId) === user?.id
+).length
 
   const mainMenu: MenuItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },

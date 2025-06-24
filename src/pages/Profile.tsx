@@ -5,7 +5,6 @@ import {
   AccordionTrigger,
 } from '@components/ui/accordion'
 import { useAuthStore } from '@store/authStore'
-import rawProfileData from '@mocks/profile.json'
 import { useEffect, useState } from 'react'
 
 interface ContactInfo {
@@ -32,12 +31,42 @@ const Profile = () => {
   const [showFullImage, setShowFullImage] = useState(false)
 
   useEffect(() => {
-    if (user) {
-      const profiles: unknown = rawProfileData
-      const typedProfiles = Array.isArray(profiles) ? (profiles as UserProfile[]) : []
-      const found = typedProfiles.find((p) => p.userId === user.id)
-      setProfile(found || null)
+    const fetchProfile = async () => {
+      if (!user) return
+
+      try {
+        const API_URL = import.meta.env.VITE_API_URL
+        const res = await fetch(`${API_URL}/empleado/${user.id}`, {
+          headers: { Authorization: `Bearer ${user.token}` },
+        })
+        const data = await res.json()
+        const record = data?.recordset?.[0]
+
+        if (!record) return
+
+        const mapped: UserProfile = {
+          userId: record.EMPLEADO_ID,
+          name: record.NOMBRE,
+          position: record.PUESTO || 'Colaborador',
+          photoUrl: record.FOTO_URL || 'https://i.pravatar.cc/300',
+          contact: {
+            address: record.DIRECCION || 'No disponible',
+            phone: record.TEL_FIJO || 'N/A',
+            mobile: record.TEL_MOVIL || 'N/A',
+            email: record.EMAIL || 'N/A',
+            startDate: record.FECHA_INGRESO || new Date().toISOString(),
+          },
+          experience: record.EXPERIENCIA || '',
+          education: record.EDUCACION || '',
+        }
+
+        setProfile(mapped)
+      } catch (err) {
+        console.error('Error al cargar perfil:', err)
+      }
     }
+
+    fetchProfile()
   }, [user])
 
   if (!profile) return null

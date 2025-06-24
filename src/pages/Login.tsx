@@ -1,30 +1,35 @@
 import { useState } from 'react'
 import { useAuthStore } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
-import { loginWithMock, type User } from '@services/authService'
+import { login, type User } from '@services/authService'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
-  const login = useAuthStore((state) => state.login)
+  const loginToStore = useAuthStore((state) => state.login)
   const navigate = useNavigate()
 
   const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    setError('')
     if (!username.trim() || !password.trim()) {
       setError('Por favor ingresa usuario y contraseña')
       return
     }
 
+    setLoading(true)
     try {
-      const user: User = loginWithMock(username.trim(), password.trim())
-      login(user)
+      const user: User = await login(username.trim(), password.trim())
+      loginToStore(user)
       navigate('/dashboard')
     } catch (err) {
       setError((err as Error).message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -82,9 +87,10 @@ export default function Login() {
         {/* Botón INGRESAR */}
         <button
           onClick={handleLogin}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-60"
         >
-          Ingresar
+          {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
 
         {/* Separador visual */}

@@ -1,26 +1,32 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
-import data from "@mocks/days.json"
 import { useAuthStore } from '@store/authStore'
-
-interface Request {
-  date: string
-  type: string
-  status: string
-}
+import { getAllRequests } from '@services/requestService'
+import type { Request } from '@services/requestService'
 
 const DaysTable = () => {
   const [requests, setRequests] = useState<Request[]>([])
   const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
 
   useEffect(() => {
-    const user = useAuthStore.getState().user
-    const userData = data.find((d) => d.userId === user?.id)
-    if (userData) {
-      setRequests(userData.requests)
+    const fetchData = async () => {
+      if (!user) return
+
+      try {
+        const all = await getAllRequests(user.token, user.id)
+        const filtered = all.filter((r) =>
+          r.type === 'Vacación' || r.type === 'Permiso'
+        )
+        setRequests(filtered)
+      } catch (error) {
+        console.error('Error al cargar solicitudes:', error)
+      }
     }
-  }, [])
+
+    fetchData()
+  }, [user])
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative">
@@ -65,7 +71,7 @@ const DaysTable = () => {
                 requests.map((req, i) => {
                   const statusUpper = req.status.toUpperCase()
                   const statusColor =
-                    statusUpper === "APROBADO" || statusUpper === "APPROVED"
+                    statusUpper === "APROBADA" || statusUpper === "APPROVED"
                       ? "bg-green-100 text-green-700"
                       : "bg-yellow-100 text-yellow-700"
 
