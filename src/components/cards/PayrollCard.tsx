@@ -6,6 +6,8 @@ import { getLastPayroll } from '@services/payrollService'
 interface PayrollData {
   amount: number
   date: string
+  periodo?: string      // PERIODO_AAMM
+  tipo?: string         // GRUPO_PAGO_DESC
 }
 
 const PayrollCard = () => {
@@ -19,16 +21,12 @@ const PayrollCard = () => {
 
       try {
         const data = await getLastPayroll()
-
-        if (
-          data &&
-          typeof data === 'object' &&
-          typeof data.amount === 'number' &&
-          typeof data.date === 'string'
-        ) {
+        if (data && typeof data.amount === 'number' && typeof data.date === 'string') {
           setLastPayment({
             amount: data.amount,
             date: data.date,
+            periodo: data.periodo,
+            tipo: data.tipo,
           })
         } else {
           console.warn('⚠️ Último pago inválido o vacío:', data)
@@ -41,16 +39,6 @@ const PayrollCard = () => {
     fetchPayroll()
   }, [user])
 
-  const formatMonth = (dateStr: string) => {
-    const date = new Date(dateStr)
-    const month = date.toLocaleString('es-ES', { month: 'long' }).toUpperCase()
-    return {
-      year: date.getFullYear(),
-      month,
-      quincena: date.getDate() <= 15 ? 'PRIMERA QUINCENA' : 'SEGUNDA QUINCENA',
-    }
-  }
-
   if (!lastPayment || !lastPayment.amount) {
     return (
       <div className="card-bg rounded-2xl shadow px-10 py-4">
@@ -59,7 +47,12 @@ const PayrollCard = () => {
     )
   }
 
-  const { year, month, quincena } = formatMonth(lastPayment.date)
+  const { amount, periodo, tipo } = lastPayment
+  const year = periodo?.slice(0, 4) ?? ''
+  const mesNum = parseInt(periodo?.slice(5, 7) ?? '1', 10)
+  const month = new Date(2000, mesNum - 1).toLocaleString('es-ES', {
+    month: 'long',
+  }).toUpperCase()
 
   return (
     <div
@@ -70,12 +63,14 @@ const PayrollCard = () => {
         <div className="flex justify-between items-center text-left">
           <div>
             <p className="text-xs text-gray-500">{year}</p>
-            <p className="text-md font-bold text-gray-800 dark:text-white">{month}</p>
-            <p className="text-xs text-gray-500">{quincena}</p>
+            <p className="text-md font-bold text-gray-800 dark:text-white">
+              {month?.toUpperCase() ?? ''}
+            </p>
+            <p className="text-xs text-gray-500">{tipo}</p>
           </div>
           <div className="text-right">
             <p className="text-xl font-bold text-gray-800 dark:text-white">
-              Q{lastPayment.amount.toLocaleString('es-GT', {
+              Q{amount.toLocaleString('es-GT', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}

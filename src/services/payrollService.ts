@@ -1,10 +1,10 @@
-// src/services/payrollService.ts
-
 import { fetchJson } from '@utils/apiClient'
 
 export type PayrollPayment = {
   amount: number
   date: string
+  periodo?: string       // ← nuevo
+  tipo?: string          // ← nuevo
   earnings: { label: string; amount: number }[]
   deductions: { label: string; amount: number }[]
   downloadUrl?: string
@@ -14,41 +14,40 @@ export type PayrollPayment = {
 
 type RawSueldoItem = {
   PERIODO_AAMMNO?: string
+  PERIODO_AAMM?: string     // ← nuevo
   MONTO?: number
   DESCRIPCION?: string
-  CODIGO_TOT?: 'I' | 'D'
+  GRUPO_PAGO_DESC?: string  // ← nuevo
+  CODIGO_TOT?: string
   BOLETA?: string
   URL_BOLETA?: string
 }
 
-// ✅ Último pago
+
+// ✅ Último pago (TT3) ordenado por fecha más reciente
 export const getLastPayroll = async (): Promise<PayrollPayment | null> => {
   const data = await fetchJson('/INDICADORES/SUELDOS')
   const records: RawSueldoItem[] = data?.recordset ?? []
 
   if (records.length === 0) return null
 
-  const ingresos = records.filter(r => r.CODIGO_TOT === 'I')
-  const deducciones = records.filter(r => r.CODIGO_TOT === 'D')
-  const total = ingresos.reduce((sum, r) => sum + (r.MONTO ?? 0), 0)
-  const latest = records[0]
+  const latest = records.find(r => r.CODIGO_TOT === 'TT3')
+
+  if (!latest) return null
 
   return {
-    amount: total,
+    amount: latest.MONTO ?? 0,
     date: latest.PERIODO_AAMMNO ?? new Date().toISOString(),
-    earnings: ingresos.map(r => ({
-      label: r.DESCRIPCION ?? '',
-      amount: r.MONTO ?? 0,
-    })),
-    deductions: deducciones.map(r => ({
-      label: r.DESCRIPCION ?? '',
-      amount: r.MONTO ?? 0,
-    })),
+    periodo: latest.PERIODO_AAMM ?? '',
+    tipo: latest.GRUPO_PAGO_DESC ?? '',
+    earnings: [],
+    deductions: [],
     downloadUrl: latest.URL_BOLETA,
   }
 }
 
-// ✅ Historial
+
+// ✅ Historial completo agrupado por periodo
 export const getPayrollForUser = async (): Promise<PayrollPayment[]> => {
   const data = await fetchJson('/INDICADORES/SUELDOS')
   const records: RawSueldoItem[] = data?.recordset ?? []
@@ -81,20 +80,24 @@ export const getPayrollForUser = async (): Promise<PayrollPayment[]> => {
   })
 }
 
-// ✅ Detalle por período
+// ✅ Detalle de un periodo específico
 export const getPayrollDetail = async (periodo: string) => {
   const data = await fetchJson(`/INDICADORES/SUELDO_DETALLE/${periodo}`)
   const records: RawSueldoItem[] = data?.recordset ?? []
 
-  const earnings = records.filter(r => r.CODIGO_TOT === 'I').map(r => ({
-    label: r.DESCRIPCION ?? '',
-    amount: r.MONTO ?? 0,
-  }))
+  const earnings = records
+    .filter(r => r.CODIGO_TOT === 'I')
+    .map(r => ({
+      label: r.DESCRIPCION ?? '',
+      amount: r.MONTO ?? 0,
+    }))
 
-  const deductions = records.filter(r => r.CODIGO_TOT === 'D').map(r => ({
-    label: r.DESCRIPCION ?? '',
-    amount: r.MONTO ?? 0,
-  }))
+  const deductions = records
+    .filter(r => r.CODIGO_TOT === 'D')
+    .map(r => ({
+      label: r.DESCRIPCION ?? '',
+      amount: r.MONTO ?? 0,
+    }))
 
   return { earnings, deductions }
 }
