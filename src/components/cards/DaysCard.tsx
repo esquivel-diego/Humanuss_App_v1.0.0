@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@store/authStore'
-import { getVacationIndicators } from '@services/indicatorService'
+import { getVacationIndicators } from '@services/vacationService'
 import { getAllRequests } from '@services/requestService'
 import type { Request } from '@services/requestService'
+
+const truncate1Decimal = (num: number) => Math.floor(num * 10) / 10
 
 const DaysCard = () => {
   const [diasTomados, setDiasTomados] = useState(0)
   const [diasDisponibles, setDiasDisponibles] = useState(0)
-  const [diasPagados, setDiasPagados] = useState(0)
   const [lastStatus, setLastStatus] = useState('N/A')
 
   const navigate = useNavigate()
@@ -19,28 +20,17 @@ const DaysCard = () => {
       if (!user) return
 
       try {
-        // 🔒 Indicadores desde backend oficial
-        const indicators = await getVacationIndicators(user)
+        const indicators = await getVacationIndicators()
+        const tomados = truncate1Decimal(indicators.diasGozados ?? 0)
+        const cantidad = truncate1Decimal(indicators.cantidad ?? 0)
 
-        if (
-          indicators &&
-          typeof indicators === 'object' &&
-          'diasGozados' in indicators &&
-          'cantidad' in indicators &&
-          'diasPagados' in indicators
-        ) {
-          setDiasTomados(indicators.diasGozados ?? 0)
-          setDiasDisponibles(indicators.cantidad ?? 0)
-          setDiasPagados(indicators.diasPagados ?? 0)
-        } else {
-          console.warn('⚠️ Indicadores con formato inesperado:', indicators)
-        }
+        setDiasTomados(tomados)
+        setDiasDisponibles(truncate1Decimal(cantidad - tomados))
       } catch (err) {
-        console.error('❌ Error al cargar indicadores:', err)
+        console.error('❌ Error al cargar indicadores de vacaciones:', err)
       }
 
       try {
-        // 🔒 Última solicitud desde backend propio
         const requests: Request[] = await getAllRequests(user)
         const filtered = requests.filter(
           (r) => r.type === 'Vacación' || r.type === 'Permiso'
@@ -75,21 +65,14 @@ const DaysCard = () => {
         <div className="text-center">
           <p className="text-xs text-gray-500 uppercase">Tomados</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">
-            {diasTomados.toString().padStart(2, '0')}
+            {diasTomados.toFixed(1).padStart(4, '0')}
           </p>
         </div>
 
         <div className="text-center">
           <p className="text-xs text-gray-500 uppercase">Disponibles</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">
-            {diasDisponibles.toString().padStart(2, '0')}
-          </p>
-        </div>
-
-        <div className="text-center">
-          <p className="text-xs text-gray-500 uppercase">Pagados</p>
-          <p className="text-2xl font-bold text-gray-800 dark:text-white">
-            {diasPagados.toString().padStart(2, '0')}
+            {diasDisponibles.toFixed(1).padStart(4, '0')}
           </p>
         </div>
 
