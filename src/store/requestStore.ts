@@ -1,33 +1,31 @@
-// src/store/requestStore.ts
 import { create } from 'zustand'
-import { getAllRequests, updateRequestStatus } from '@services/requestService'
+import type { User } from '@services/authService'
+import { getAllRequests } from '@services/requestService'
 import type { Request, RequestStatus } from '@services/requestService'
-import { useAuthStore } from './authStore'
 
 type RequestStore = {
   requests: Request[]
-  fetchRequests: () => Promise<void>
-  updateStatus: (id: number, newStatus: RequestStatus) => void
+  fetchRequests: (user: User) => Promise<void>
+  updateRequestStatus: (id: number, newStatus: RequestStatus) => void
 }
 
-export const useRequestStore = create<RequestStore>((set) => ({
+export const useRequestStore = create<RequestStore>((set, get) => ({
   requests: [],
 
-  fetchRequests: async () => {
+  fetchRequests: async (user) => {
     try {
-      const { user } = useAuthStore.getState()
-      if (!user) return
-
-      const data = await getAllRequests() // ✅
+      const data = await getAllRequests(user)
       set({ requests: data })
     } catch (error) {
       console.error('Error al obtener solicitudes:', error)
     }
   },
 
-  updateStatus: (id, newStatus) => {
-    // ⚠️ Esto sigue siendo mock, ya que no hay endpoint real
-    const updated = updateRequestStatus(id, newStatus)
+  updateRequestStatus: (id, newStatus) => {
+    const updated = get().requests.map((r) =>
+      r.id === id ? { ...r, status: newStatus } : r
+    )
     set({ requests: updated })
   }
 }))
+

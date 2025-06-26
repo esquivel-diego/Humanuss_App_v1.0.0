@@ -24,18 +24,19 @@ const AbsenceRequest = () => {
     }
 
     try {
-      await createRequest({
-        type: 'Permiso',
+      await createRequest(user, {
+        type: 'Vacación',
         date: requestDate,
         range: dates,
-        notes
+        notes,
       })
 
+
       addNotification({
-        userId: user.id, // string desde authStore
+        userId: user.id,
         message: 'Tu solicitud de ausencia fue enviada y está pendiente de aprobación.',
         date: new Date().toISOString(),
-        read: false
+        read: false,
       })
 
       setSubmitted(true)
@@ -77,14 +78,16 @@ const AbsenceRequest = () => {
                 <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 block mb-1">
                   Tipo de ausencia
                 </label>
-                <input
-                  type="text"
+                <select
                   value={absenceType}
                   onChange={(e) => setAbsenceType(e.target.value)}
-                  placeholder="type here"
                   className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
                   required
-                />
+                >
+                  <option value="">Selecciona una opción</option>
+                  <option value="Vacación">Vacación</option>
+                  <option value="Permiso">Permiso</option>
+                </select>
               </div>
 
               <div>
@@ -115,7 +118,7 @@ const AbsenceRequest = () => {
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="type here"
+                  placeholder="Opcional"
                   className="w-full h-24 px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 resize-none focus:outline-none"
                 />
               </div>

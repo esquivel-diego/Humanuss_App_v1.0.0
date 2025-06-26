@@ -1,3 +1,5 @@
+// src/components/PayrollCard.tsx
+
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@store/authStore'
@@ -24,7 +26,10 @@ const PayrollCard = () => {
           throw new Error('Respuesta inesperada del servidor')
         }
 
-        setLastPayment({ amount: data.amount, date: data.date })
+        setLastPayment({
+          amount: data.amount ?? 0,
+          date: data.date ?? new Date().toISOString(), // usa hoy como fallback
+        })
       } catch (err) {
         console.error('Error al cargar nómina:', err)
       }

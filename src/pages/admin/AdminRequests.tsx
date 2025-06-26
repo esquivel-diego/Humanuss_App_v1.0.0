@@ -11,7 +11,7 @@ const AdminRequests = () => {
   const navigate = useNavigate()
   const requests = useRequestStore((state) => state.requests)
   const fetchRequests = useRequestStore((state) => state.fetchRequests)
-  const updateRequestStatus = useRequestStore((state) => state.updateStatus)
+const updateRequestStatus = useRequestStore((state) => state.updateRequestStatus)
   const addNotification = useNotificationStore((state) => state.addNotification)
   const user = useAuthStore((state) => state.user)
 
@@ -19,10 +19,10 @@ const AdminRequests = () => {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    fetchRequests()
+    if (!user) return
+    fetchRequests(user)
 
     const loadEmployees = async () => {
-      if (!user) return
       try {
         const all = await getAllEmployees(user)
         setEmployees(all)

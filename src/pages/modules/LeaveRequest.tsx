@@ -24,12 +24,14 @@ const LeaveRequest = () => {
     }
 
     try {
-      await createRequest({
+      await createRequest(user, {
         type: 'Vacación',
         date: requestDate,
         range: dates,
         notes,
       })
+
+
 
       addNotification({
         userId: user.id,

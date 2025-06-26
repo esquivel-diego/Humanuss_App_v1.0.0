@@ -1,41 +1,51 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@store/authStore'
+import { getVacationIndicators } from '@services/indicatorService'
 import { getAllRequests } from '@services/requestService'
 import type { Request } from '@services/requestService'
 
 const DaysCard = () => {
-  const totalDays = 15
-  const [availableDays, setAvailableDays] = useState<number>(totalDays)
-  const [requests, setRequests] = useState<Request[]>([])
+  const [diasTomados, setDiasTomados] = useState(0)
+  const [diasDisponibles, setDiasDisponibles] = useState(0)
+  const [diasPagados, setDiasPagados] = useState(0)
+  const [lastStatus, setLastStatus] = useState('N/A')
+
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
 
-useEffect(() => {
-  const fetchData = async () => {
-    if (!user) return
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return
 
-    try {
-      const all = await getAllRequests() // ← FIX AQUÍ
-      const approved = all.filter(
-        (r) =>
-          r.status.toLowerCase() === 'aprobada' &&
-          (r.type === 'Vacación' || r.type === 'Permiso')
-      )
+      try {
+        // Obtener indicadores
+        const indicators = await getVacationIndicators(user)
+        if (indicators) {
+          setDiasTomados(indicators.diasGozados)
+          setDiasDisponibles(indicators.cantidad)
+          setDiasPagados(indicators.diasPagados)
+        }
 
-      setRequests(all)
-      setAvailableDays(totalDays - approved.length)
-    } catch (error) {
-      console.error('Error al cargar solicitudes:', error)
+        // Obtener última solicitud
+        const requests: Request[] = await getAllRequests(user)
+        const filtered = requests.filter(
+          (r) => r.type === 'Vacación' || r.type === 'Permiso'
+        )
+
+        const sorted = filtered.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+
+        setLastStatus(sorted[0]?.status ?? 'N/A')
+      } catch (error) {
+        console.error('Error al cargar datos de días:', error)
+      }
     }
-  }
 
-  fetchData()
-}, [user])
+    fetchData()
+  }, [user])
 
-
-  const takenDays = totalDays - availableDays
-  const lastStatus = requests[0]?.status || 'N/A'
   const isApproved =
     lastStatus.toLowerCase() === 'aprobada' || lastStatus.toLowerCase() === 'approved'
 
@@ -48,18 +58,25 @@ useEffect(() => {
         DÍAS DISPONIBLES
       </h2>
 
-      <div className="flex justify-center gap-20">
+      <div className="flex justify-center gap-10 md:gap-16 lg:gap-20">
         <div className="text-center">
           <p className="text-xs text-gray-500 uppercase">Tomados</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">
-            {takenDays.toString().padStart(2, '0')}
+            {diasTomados.toString().padStart(2, '0')}
           </p>
         </div>
 
         <div className="text-center">
           <p className="text-xs text-gray-500 uppercase">Disponibles</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">
-            {availableDays.toString().padStart(2, '0')}
+            {diasDisponibles.toString().padStart(2, '0')}
+          </p>
+        </div>
+
+        <div className="text-center">
+          <p className="text-xs text-gray-500 uppercase">Pagados</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-white">
+            {diasPagados.toString().padStart(2, '0')}
           </p>
         </div>
 
@@ -67,9 +84,7 @@ useEffect(() => {
           <p className="text-xs text-gray-500 uppercase whitespace-nowrap">Último estatus</p>
           <span
             className={`inline-block text-xs font-semibold px-4 py-1 rounded-full ${
-              isApproved
-                ? 'bg-green-100 text-green-700'
-                : 'bg-yellow-100 text-yellow-700'
+              isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
             }`}
           >
             {lastStatus.toUpperCase()}
