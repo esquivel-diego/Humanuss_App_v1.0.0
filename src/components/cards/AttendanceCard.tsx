@@ -11,7 +11,7 @@ import type { RectangleProps } from "recharts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@store/authStore";
-import { getWeeklyAttendance } from "@services/attendanceService"; // ✅ función real
+import { getWeeklyAttendance } from "@services/attendanceService";
 
 interface AttendanceBar {
   name: string;
@@ -60,6 +60,11 @@ const AttendanceCard = () => {
 
       try {
         const attendance = await getWeeklyAttendance(user);
+
+        if (!Array.isArray(attendance)) {
+          throw new Error("Respuesta inesperada del servidor");
+        }
+
         const checkIns = attendance.map((d) => parseToMinutes(d.checkIn));
         const adjustedMin = Math.min(...checkIns) - 15;
         const adjustedMax = Math.max(...checkIns);
@@ -73,6 +78,7 @@ const AttendanceCard = () => {
         const avg = Math.round(
           checkIns.reduce((a, b) => a + b, 0) / checkIns.length
         );
+
         setAvgTime(formatHour(avg));
         setChartData(parsed);
         setMin(adjustedMin);

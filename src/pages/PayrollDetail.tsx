@@ -13,9 +13,15 @@ const PayrollDetail = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user || index === undefined) return
+      if (!user?.id || index === undefined) return
+
       try {
         const all = await getPayrollForUser(user)
+
+        if (!Array.isArray(all)) {
+          throw new Error("Respuesta inesperada del servidor")
+        }
+
         const target = all[Number(index)]
         if (target) setPayment(target)
       } catch (err) {

@@ -24,7 +24,7 @@ const AbsenceRequest = () => {
     }
 
     try {
-      await createRequest(user, {
+      await createRequest({
         type: 'Permiso',
         date: requestDate,
         range: dates,

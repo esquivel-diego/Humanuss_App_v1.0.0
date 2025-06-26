@@ -6,6 +6,7 @@ import {
 } from '@components/ui/accordion'
 import { useAuthStore } from '@store/authStore'
 import { useEffect, useState } from 'react'
+import { apiClient } from '@utils/apiClient'
 
 interface ContactInfo {
   address: string
@@ -32,16 +33,19 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user) return
+      if (!user?.id) return
 
       try {
-        const API_URL = import.meta.env.VITE_API_URL
-        const res = await fetch(`${API_URL}/empleado/${user.id}`, {
-          headers: { Authorization: `Bearer ${user.token}` },
-        })
+        const res = await apiClient(`/empleado/${user.id}`)
+
+        if (!res.ok || !res.headers.get('content-type')?.includes('application/json')) {
+          const text = await res.text()
+          console.error('Respuesta inesperada:', text)
+          throw new Error('Error en la respuesta del servidor')
+        }
+
         const data = await res.json()
         const record = data?.recordset?.[0]
-
         if (!record) return
 
         const mapped: UserProfile = {
@@ -74,7 +78,6 @@ const Profile = () => {
   return (
     <div className="min-h-screen pt-20 px-4 text-gray-900 dark:text-white">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Card principal con foto */}
         <div className="relative card-bg rounded-2xl p-6 text-center shadow-xl pt-20">
           <img
             src={profile.photoUrl}
@@ -86,7 +89,6 @@ const Profile = () => {
           <p className="text-gray-500 dark:text-gray-400">{profile.position}</p>
         </div>
 
-        {/* Secciones desplegables */}
         <Accordion type="single" collapsible className="space-y-4">
           <AccordionItem value="contacto">
             <AccordionTrigger className="hover:no-underline hover:text-blue-500 hover:scale-[1.01] transition-all">
@@ -130,7 +132,6 @@ const Profile = () => {
         </Accordion>
       </div>
 
-      {/* Modal imagen ampliada */}
       {showFullImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"

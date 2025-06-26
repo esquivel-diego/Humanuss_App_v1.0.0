@@ -24,9 +24,15 @@ const PayrollTable = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return
+      if (!user || !user.id) return
+
       try {
         const data = await getPayrollForUser(user)
+
+        if (!Array.isArray(data)) {
+          throw new Error("Respuesta inesperada del servidor")
+        }
+
         const sorted = [...data].sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         )
@@ -41,7 +47,6 @@ const PayrollTable = () => {
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative">
-      {/* Botón flotante de regreso */}
       <button
         onClick={() => navigate("/")}
         className="fixed bottom-4 right-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"

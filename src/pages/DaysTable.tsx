@@ -15,7 +15,7 @@ const DaysTable = () => {
       if (!user) return
 
       try {
-        const all = await getAllRequests(user.token, user.id)
+        const all = await getAllRequests()
         const filtered = all.filter((r) =>
           r.type === 'Vacación' || r.type === 'Permiso'
         )
@@ -30,7 +30,6 @@ const DaysTable = () => {
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative">
-      {/* Botón flotante de regreso */}
       <button
         onClick={() => navigate("/")}
         className="fixed bottom-4 right-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"
@@ -44,7 +43,6 @@ const DaysTable = () => {
           Solicitudes de Días
         </div>
 
-        {/* Scroll solo si es necesario */}
         <div className="card-bg shadow-xl rounded-2xl overflow-x-auto overflow-y-auto max-h-[70vh]">
           <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-100 dark:bg-gray-700 text-left">

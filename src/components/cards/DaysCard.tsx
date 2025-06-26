@@ -11,27 +11,28 @@ const DaysCard = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return
+useEffect(() => {
+  const fetchData = async () => {
+    if (!user) return
 
-      try {
-        const all = await getAllRequests(user.token, user.id)
-        const approved = all.filter(
-          (r) =>
-            r.status.toLowerCase() === 'aprobada' &&
-            (r.type === 'Vacación' || r.type === 'Permiso')
-        )
+    try {
+      const all = await getAllRequests() // ← FIX AQUÍ
+      const approved = all.filter(
+        (r) =>
+          r.status.toLowerCase() === 'aprobada' &&
+          (r.type === 'Vacación' || r.type === 'Permiso')
+      )
 
-        setRequests(all)
-        setAvailableDays(totalDays - approved.length)
-      } catch (error) {
-        console.error('Error al cargar solicitudes:', error)
-      }
+      setRequests(all)
+      setAvailableDays(totalDays - approved.length)
+    } catch (error) {
+      console.error('Error al cargar solicitudes:', error)
     }
+  }
 
-    fetchData()
-  }, [user])
+  fetchData()
+}, [user])
+
 
   const takenDays = totalDays - availableDays
   const lastStatus = requests[0]?.status || 'N/A'
@@ -48,7 +49,6 @@ const DaysCard = () => {
       </h2>
 
       <div className="flex justify-center gap-20">
-        {/* Tomados */}
         <div className="text-center">
           <p className="text-xs text-gray-500 uppercase">Tomados</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">
@@ -56,7 +56,6 @@ const DaysCard = () => {
           </p>
         </div>
 
-        {/* Disponibles */}
         <div className="text-center">
           <p className="text-xs text-gray-500 uppercase">Disponibles</p>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">
@@ -64,7 +63,6 @@ const DaysCard = () => {
           </p>
         </div>
 
-        {/* Último estatus */}
         <div className="text-center">
           <p className="text-xs text-gray-500 uppercase whitespace-nowrap">Último estatus</p>
           <span

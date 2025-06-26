@@ -1,4 +1,7 @@
+// src/services/attendanceService.ts
+
 import type { User } from './authService'
+import { fetchJson } from '@utils/apiClient'
 
 export type AttendanceDay = {
   day: string
@@ -6,27 +9,15 @@ export type AttendanceDay = {
   checkOut: string
 }
 
-export const getWeeklyAttendance = async (
-  user: User
-): Promise<AttendanceDay[]> => {
-  const API_URL = import.meta.env.VITE_API_URL
-
-  const res = await fetch(`${API_URL}/marcaje/${user.id}`, {
-    headers: {
-      Authorization: `Bearer ${user.token}`,
-    },
-  })
-
-  if (!res.ok) {
-    throw new Error('Error al obtener asistencia semanal')
-  }
-
-  const data = await res.json()
+// ✅ Obtiene la asistencia semanal del usuario autenticado
+export const getWeeklyAttendance = async (user: User): Promise<AttendanceDay[]> => {
+  const query = `/indicadores?TIPO=MARCAJE&EMPLEADO_ID=${encodeURIComponent(user.id)}`
+  const data = await fetchJson(query)
   const raw = data?.recordset ?? []
 
   return raw.map((entry: any) => ({
-    day: entry.DIA,
-    checkIn: entry.CHECKIN,
-    checkOut: entry.CHECKOUT,
+    day: entry.DIA ?? '',
+    checkIn: entry.CHECKIN ?? '',
+    checkOut: entry.CHECKOUT ?? '',
   }))
 }

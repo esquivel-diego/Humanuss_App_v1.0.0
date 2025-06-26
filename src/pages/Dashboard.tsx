@@ -5,18 +5,11 @@ import PayrollCard from '@components/cards/PayrollCard'
 import AttendanceCard from '@components/cards/AttendanceCard'
 import CheckInCard from '@components/cards/CheckInCard'
 import CheckOutCard from '@components/cards/CheckOutCard'
-
-/**
- * Página principal del dashboard que muestra las 5 tarjetas clave:
- * - Días disponibles
- * - Nómina
- * - Asistencia
- * - Check-in
- * - Check-out
- */
+import { useAuthStore } from '@store/authStore'
 
 const Dashboard = () => {
   const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
 
   useEffect(() => {
     document.title = 'Humanuss | Dashboard'
@@ -28,15 +21,19 @@ const Dashboard = () => {
       <div className="flex items-center justify-between px-2 py-3 mb-4">
         <div>
           <h2 className="text-lg font-semibold text-black dark:text-white">
-            Diego Esquivel
+            {user?.name ?? 'Usuario'}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Desarrollador de software
+            {user?.role === 'admin' ? 'Administrador' : 'Colaborador'}
           </p>
         </div>
         <img
           onClick={() => navigate('/profile')}
-          src="src/assets/perfil.png"
+          src={
+            user?.photoUrl && user.photoUrl.trim() !== ''
+              ? user.photoUrl
+              : 'src/assets/perfil.png'
+          }
           alt="Foto de perfil"
           className="w-14 h-14 rounded-full object-cover shadow-md cursor-pointer hover:brightness-110 transition"
         />

@@ -24,7 +24,7 @@ const LeaveRequest = () => {
     }
 
     try {
-      await createRequest(user, {
+      await createRequest({
         type: 'Vacación',
         date: requestDate,
         range: dates,

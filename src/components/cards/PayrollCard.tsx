@@ -15,10 +15,16 @@ const PayrollCard = () => {
 
   useEffect(() => {
     const fetchPayroll = async () => {
-      if (!user) return
+      if (!user || !user.id) return
+
       try {
         const data = await getLastPayroll(user)
-        setLastPayment(data)
+
+        if (!data || typeof data !== 'object') {
+          throw new Error('Respuesta inesperada del servidor')
+        }
+
+        setLastPayment({ amount: data.amount, date: data.date })
       } catch (err) {
         console.error('Error al cargar nómina:', err)
       }

@@ -18,7 +18,7 @@ export const useRequestStore = create<RequestStore>((set) => ({
       const { user } = useAuthStore.getState()
       if (!user) return
 
-      const data = await getAllRequests(user.token, user.id)
+      const data = await getAllRequests() // ✅
       set({ requests: data })
     } catch (error) {
       console.error('Error al obtener solicitudes:', error)

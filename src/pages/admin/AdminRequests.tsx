@@ -3,8 +3,9 @@ import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useNotificationStore } from '@store/notificationStore'
 import { useRequestStore } from '@store/requestStore'
-import { getAllEmployees } from '@services/newsService' // reutilizado
-import type { Empleado } from '@services/newsService'
+import { useAuthStore } from '@store/authStore'
+import { getAllEmployees } from '@services/employeeService'
+import type { Empleado } from '@services/employeeService'
 
 const AdminRequests = () => {
   const navigate = useNavigate()
@@ -12,6 +13,7 @@ const AdminRequests = () => {
   const fetchRequests = useRequestStore((state) => state.fetchRequests)
   const updateRequestStatus = useRequestStore((state) => state.updateStatus)
   const addNotification = useNotificationStore((state) => state.addNotification)
+  const user = useAuthStore((state) => state.user)
 
   const [employees, setEmployees] = useState<Empleado[]>([])
   const [isMobile, setIsMobile] = useState(false)
@@ -20,8 +22,9 @@ const AdminRequests = () => {
     fetchRequests()
 
     const loadEmployees = async () => {
+      if (!user) return
       try {
-        const all = await getAllEmployees()
+        const all = await getAllEmployees(user)
         setEmployees(all)
       } catch (err) {
         console.error('Error cargando empleados:', err)
@@ -34,7 +37,7 @@ const AdminRequests = () => {
     handleResize()
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [fetchRequests])
+  }, [fetchRequests, user])
 
   const buildNotificationMessage = (type: string, status: 'aprobada' | 'rechazada') => {
     const t = type.toLowerCase()
