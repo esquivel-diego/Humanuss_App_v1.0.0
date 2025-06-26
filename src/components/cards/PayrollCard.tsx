@@ -1,5 +1,3 @@
-// src/components/PayrollCard.tsx
-
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@store/authStore'
@@ -20,18 +18,23 @@ const PayrollCard = () => {
       if (!user || !user.id) return
 
       try {
-        const data = await getLastPayroll(user)
+        const data = await getLastPayroll()
 
-        if (!data || typeof data !== 'object') {
-          throw new Error('Respuesta inesperada del servidor')
+        if (
+          data &&
+          typeof data === 'object' &&
+          typeof data.amount === 'number' &&
+          typeof data.date === 'string'
+        ) {
+          setLastPayment({
+            amount: data.amount,
+            date: data.date,
+          })
+        } else {
+          console.warn('⚠️ Último pago inválido o vacío:', data)
         }
-
-        setLastPayment({
-          amount: data.amount ?? 0,
-          date: data.date ?? new Date().toISOString(), // usa hoy como fallback
-        })
       } catch (err) {
-        console.error('Error al cargar nómina:', err)
+        console.error('❌ Error al cargar nómina:', err)
       }
     }
 
@@ -48,7 +51,13 @@ const PayrollCard = () => {
     }
   }
 
-  if (!lastPayment) return null
+  if (!lastPayment || !lastPayment.amount) {
+    return (
+      <div className="card-bg rounded-2xl shadow px-10 py-4">
+        <p className="text-sm text-gray-500 text-center">No hay datos de nómina disponibles</p>
+      </div>
+    )
+  }
 
   const { year, month, quincena } = formatMonth(lastPayment.date)
 
@@ -66,7 +75,7 @@ const PayrollCard = () => {
           </div>
           <div className="text-right">
             <p className="text-xl font-bold text-gray-800 dark:text-white">
-              Q{Number(lastPayment.amount).toLocaleString('es-GT', {
+              Q{lastPayment.amount.toLocaleString('es-GT', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}

@@ -27,7 +27,7 @@ const PayrollTable = () => {
       if (!user || !user.id) return
 
       try {
-        const data = await getPayrollForUser(user)
+        const data = await getPayrollForUser()
 
         if (!Array.isArray(data)) {
           throw new Error("Respuesta inesperada del servidor")

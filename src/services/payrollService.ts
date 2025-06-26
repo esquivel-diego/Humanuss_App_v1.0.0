@@ -1,8 +1,6 @@
 // src/services/payrollService.ts
 
-import type { User } from './authService'
 import { fetchJson } from '@utils/apiClient'
-import { sanitizeId } from '@utils/format'
 
 export type PayrollPayment = {
   amount: number
@@ -14,44 +12,89 @@ export type PayrollPayment = {
   diasPagados?: number
 }
 
-// ✅ Último pago del usuario
-export const getLastPayroll = async (user: User): Promise<PayrollPayment | null> => {
-  const cleanedId = sanitizeId(user.id)
-  const data = await fetchJson(`/indicadores?TIPO=SUELDO&EMPLEADO_ID=${cleanedId}`)
-  const record = data?.recordset?.[0]
-  if (!record || !record.SUELDO) return null
+type RawSueldoItem = {
+  PERIODO_AAMMNO?: string
+  MONTO?: number
+  DESCRIPCION?: string
+  CODIGO_TOT?: 'I' | 'D'
+  BOLETA?: string
+  URL_BOLETA?: string
+}
+
+// ✅ Último pago
+export const getLastPayroll = async (): Promise<PayrollPayment | null> => {
+  const data = await fetchJson('/INDICADORES/SUELDOS')
+  const records: RawSueldoItem[] = data?.recordset ?? []
+
+  if (records.length === 0) return null
+
+  const ingresos = records.filter(r => r.CODIGO_TOT === 'I')
+  const deducciones = records.filter(r => r.CODIGO_TOT === 'D')
+  const total = ingresos.reduce((sum, r) => sum + (r.MONTO ?? 0), 0)
+  const latest = records[0]
 
   return {
-    amount: record.SUELDO,
-    date: record.FECHA_PAGO ?? new Date().toISOString(),
-    earnings: [{ label: 'Sueldo base', amount: record.SUELDO }],
-    deductions: [
-      { label: 'IGSS', amount: record.IGSS ?? 0 },
-      { label: 'ISR', amount: record.ISR ?? 0 },
-    ],
-    downloadUrl: record.URL_BOLETA ?? undefined,
-    diasGozados: record.DIAS_GOZADOS ?? 0,
-    diasPagados: record.DIAS_PAGADOS ?? 0
+    amount: total,
+    date: latest.PERIODO_AAMMNO ?? new Date().toISOString(),
+    earnings: ingresos.map(r => ({
+      label: r.DESCRIPCION ?? '',
+      amount: r.MONTO ?? 0,
+    })),
+    deductions: deducciones.map(r => ({
+      label: r.DESCRIPCION ?? '',
+      amount: r.MONTO ?? 0,
+    })),
+    downloadUrl: latest.URL_BOLETA,
   }
 }
 
-// ✅ Historial completo
-export const getPayrollForUser = async (user: User): Promise<PayrollPayment[]> => {
-  const cleanedId = sanitizeId(user.id)
-  const data = await fetchJson(`/indicadores?TIPO=SUELDO&EMPLEADO_ID=${cleanedId}`)
-  const records = data?.recordset ?? []
+// ✅ Historial
+export const getPayrollForUser = async (): Promise<PayrollPayment[]> => {
+  const data = await fetchJson('/INDICADORES/SUELDOS')
+  const records: RawSueldoItem[] = data?.recordset ?? []
 
-  return records.map((record: any) => ({
-    amount: record.SUELDO,
-    date: record.FECHA_PAGO ?? new Date().toISOString(),
-    earnings: [{ label: 'Sueldo base', amount: record.SUELDO }],
-    deductions: [
-      { label: 'IGSS', amount: record.IGSS ?? 0 },
-      { label: 'ISR', amount: record.ISR ?? 0 },
-    ],
-    downloadUrl: record.URL_BOLETA ?? undefined,
-    diasGozados: record.DIAS_GOZADOS ?? 0,
-    diasPagados: record.DIAS_PAGADOS ?? 0,
+  const grouped = records.reduce((acc: Record<string, RawSueldoItem[]>, item) => {
+    const key = item.PERIODO_AAMMNO ?? 'SIN_FECHA'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(item)
+    return acc
+  }, {})
 
+  return Object.entries(grouped).map(([date, items]) => {
+    const ingresos = items.filter(r => r.CODIGO_TOT === 'I')
+    const deducciones = items.filter(r => r.CODIGO_TOT === 'D')
+    const total = ingresos.reduce((sum, r) => sum + (r.MONTO ?? 0), 0)
+
+    return {
+      amount: total,
+      date,
+      earnings: ingresos.map(r => ({
+        label: r.DESCRIPCION ?? '',
+        amount: r.MONTO ?? 0,
+      })),
+      deductions: deducciones.map(r => ({
+        label: r.DESCRIPCION ?? '',
+        amount: r.MONTO ?? 0,
+      })),
+      downloadUrl: items[0].URL_BOLETA,
+    }
+  })
+}
+
+// ✅ Detalle por período
+export const getPayrollDetail = async (periodo: string) => {
+  const data = await fetchJson(`/INDICADORES/SUELDO_DETALLE/${periodo}`)
+  const records: RawSueldoItem[] = data?.recordset ?? []
+
+  const earnings = records.filter(r => r.CODIGO_TOT === 'I').map(r => ({
+    label: r.DESCRIPCION ?? '',
+    amount: r.MONTO ?? 0,
   }))
+
+  const deductions = records.filter(r => r.CODIGO_TOT === 'D').map(r => ({
+    label: r.DESCRIPCION ?? '',
+    amount: r.MONTO ?? 0,
+  }))
+
+  return { earnings, deductions }
 }

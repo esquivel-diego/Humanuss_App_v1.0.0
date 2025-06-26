@@ -1,8 +1,6 @@
 // src/services/attendanceService.ts
 
-import type { User } from './authService'
 import { fetchJson } from '@utils/apiClient'
-import { sanitizeId } from '@utils/format'
 
 export type AttendanceDay = {
   day: string
@@ -10,10 +8,9 @@ export type AttendanceDay = {
   checkOut: string
 }
 
-// ✅ Asistencia semanal con parámetros válidos
-export const getWeeklyAttendance = async (user: User): Promise<AttendanceDay[]> => {
-  const cleanedId = sanitizeId(user.id)
-  const url = `/indicadores?TIPO=MARCAJE&EMPLEADO_ID=${cleanedId}`
+// ✅ Asistencia semanal desde /MARCAJE
+export const getWeeklyAttendance = async (): Promise<AttendanceDay[]> => {
+  const url = '//INDICADORES?TIPO=MARCAJE'
   const data = await fetchJson(url)
   const raw = data?.recordset ?? []
 

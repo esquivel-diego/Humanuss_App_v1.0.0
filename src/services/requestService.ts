@@ -1,12 +1,20 @@
+// src/services/requestService.ts
+
 import { fetchJson } from '@utils/apiClient'
 import type { User } from './authService'
 import type { Request, RequestStatus } from '../types/requestTypes'
 
+// ✅ Obtener historial de solicitudes (vacaciones y permisos)
 export const getAllRequests = async (user: User): Promise<Request[]> => {
   const res = await fetchJson(`/solicitudes?empleadoId=${user.id}`)
-  return res.recordset ?? []
+  if (!res || !Array.isArray(res.recordset)) {
+    console.warn('⚠️ Respuesta inesperada al obtener solicitudes:', res)
+    return []
+  }
+  return res.recordset
 }
 
+// ✅ Crear nueva solicitud (vacación o permiso)
 export const createRequest = async (
   user: User,
   request: {
@@ -17,6 +25,7 @@ export const createRequest = async (
   }
 ): Promise<void> => {
   const [start, end] = request.range.split(' al ')
+
   const payload =
     request.type === 'Vacación'
       ? {
@@ -42,15 +51,17 @@ export const createRequest = async (
 
   const endpoint =
     request.type === 'Vacación'
-      ? '/vacacion_solicitud'
-      : '/ausencia_solicitud_movil'
+      ? '/VACACION_SOLICITUD_portal'
+      : '/AUSENCIA_SOLICITUD_portal'
 
-  // Paso 1: Enviar solicitud al backend oficial
-  const response = await fetch(`https://nominapayone.com/api_demo2${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
+  const response = await fetch(
+    `https://nominapayone.com/api_demo2/api/portal${endpoint}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }
+  )
 
   if (!response.ok) {
     const text = await response.text()
@@ -58,7 +69,7 @@ export const createRequest = async (
     throw new Error('No se pudo enviar la solicitud oficial')
   }
 
-  // Paso 2: Guardar en tu backend propio
+  // ✅ Guardar en el backend propio
   const localRequest = {
     userId: user.id,
     type: request.type,

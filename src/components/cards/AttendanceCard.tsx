@@ -21,8 +21,8 @@ interface AttendanceBar {
 
 const AttendanceCard = () => {
   const [chartData, setChartData] = useState<AttendanceBar[]>([]);
-  const [min, setMin] = useState(420);
-  const [max, setMax] = useState(660);
+  const [min, setMin] = useState(420); // 07:00
+  const [max, setMax] = useState(660); // 11:00
   const [avgTime, setAvgTime] = useState("00:00");
 
   const navigate = useNavigate();
@@ -59,13 +59,18 @@ const AttendanceCard = () => {
       if (!user) return;
 
       try {
-        const attendance = await getWeeklyAttendance(user);
+        const attendance = await getWeeklyAttendance();
 
         if (!Array.isArray(attendance)) {
           throw new Error("Respuesta inesperada del servidor");
         }
 
-        const checkIns = attendance.map((d) => parseToMinutes(d.checkIn));
+        const checkIns = attendance
+          .map((d) => parseToMinutes(d.checkIn))
+          .filter((m) => !isNaN(m)); // Evita NaN
+
+        if (checkIns.length === 0) return;
+
         const adjustedMin = Math.min(...checkIns) - 15;
         const adjustedMax = Math.max(...checkIns);
 

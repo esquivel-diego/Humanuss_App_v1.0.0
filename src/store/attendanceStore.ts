@@ -41,7 +41,7 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
 
   fetchWeek: async (user) => {
     try {
-      const data = await getWeeklyAttendance(user)
+      const data = await getWeeklyAttendance()
       const newRecords = {
         ...get().records,
         [user.id]: data,

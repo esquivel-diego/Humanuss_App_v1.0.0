@@ -19,15 +19,28 @@ const DaysCard = () => {
       if (!user) return
 
       try {
-        // Obtener indicadores
+        // 🔒 Indicadores desde backend oficial
         const indicators = await getVacationIndicators(user)
-        if (indicators) {
-          setDiasTomados(indicators.diasGozados)
-          setDiasDisponibles(indicators.cantidad)
-          setDiasPagados(indicators.diasPagados)
-        }
 
-        // Obtener última solicitud
+        if (
+          indicators &&
+          typeof indicators === 'object' &&
+          'diasGozados' in indicators &&
+          'cantidad' in indicators &&
+          'diasPagados' in indicators
+        ) {
+          setDiasTomados(indicators.diasGozados ?? 0)
+          setDiasDisponibles(indicators.cantidad ?? 0)
+          setDiasPagados(indicators.diasPagados ?? 0)
+        } else {
+          console.warn('⚠️ Indicadores con formato inesperado:', indicators)
+        }
+      } catch (err) {
+        console.error('❌ Error al cargar indicadores:', err)
+      }
+
+      try {
+        // 🔒 Última solicitud desde backend propio
         const requests: Request[] = await getAllRequests(user)
         const filtered = requests.filter(
           (r) => r.type === 'Vacación' || r.type === 'Permiso'
@@ -38,8 +51,8 @@ const DaysCard = () => {
         )
 
         setLastStatus(sorted[0]?.status ?? 'N/A')
-      } catch (error) {
-        console.error('Error al cargar datos de días:', error)
+      } catch (err) {
+        console.warn('⚠️ No se pudo obtener historial de solicitudes:', err)
       }
     }
 

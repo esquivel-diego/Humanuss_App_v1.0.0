@@ -16,7 +16,7 @@ const PayrollDetail = () => {
       if (!user?.id || index === undefined) return
 
       try {
-        const all = await getPayrollForUser(user)
+        const all = await getPayrollForUser()
 
         if (!Array.isArray(all)) {
           throw new Error("Respuesta inesperada del servidor")

@@ -24,7 +24,7 @@ const AttendanceTable = () => {
     const fetchData = async () => {
       if (!user) return
       try {
-        const attendance = await getWeeklyAttendance(user)
+        const attendance = await getWeeklyAttendance()
         setWeek(attendance)
       } catch (err) {
         console.error("Error al obtener asistencia:", err)

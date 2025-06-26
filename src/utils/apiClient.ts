@@ -1,6 +1,7 @@
 // src/utils/apiClient.ts
 
-const API_BASE = 'https://nominapayone.com/api_demo2/api/movil' // 👈 CORREGIDO
+const API_BASE = 'https://nominapayone.com/api_demo2/api/portal' // 👈 CORREGIDO
+const LOCAL_API = 'http://localhost:4000'
 
 export const apiClient = async (path: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('TOKENLOG')
@@ -10,7 +11,14 @@ export const apiClient = async (path: string, options: RequestInit = {}) => {
   }
 
   const isFullUrl = path.startsWith('http')
-  const endpoint = isFullUrl ? path : `${API_BASE}${path}`
+  const isLocalRequest = path.startsWith('/solicitudes') || path.startsWith('/notificaciones')
+  // ⛔️ NO incluir /indicadores/SUELDOS aquí
+const endpoint = isFullUrl
+  ? path
+  : isLocalRequest
+    ? `${LOCAL_API}${path}`
+    : `${API_BASE}${path}`
+
 
   const hasToken = endpoint.includes('token=')
   const separator = endpoint.includes('?') ? '&' : '?'

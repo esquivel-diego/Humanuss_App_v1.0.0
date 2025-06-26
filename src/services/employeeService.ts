@@ -1,3 +1,5 @@
+// src/services/employeeService.ts
+
 import type { User } from './authService'
 import { getStoredToken } from '@utils/token'
 
@@ -6,13 +8,10 @@ export type Empleado = {
   name: string
 }
 
-const API_URL = 'https://nominapayone.com/api_demo2'
+const API_URL = 'https://nominapayone.com/api_demo2/api/portal'
 
-/**
- * Obtener todos los empleados con autenticación
- */
 export const getAllEmployees = async (_user?: User): Promise<Empleado[]> => {
-  const res = await fetch(`${API_URL}/empleado`, {
+  const res = await fetch(`${API_URL}/EMPLEADO`, {
     headers: {
       Authorization: `Bearer ${getStoredToken()}`,
     },
