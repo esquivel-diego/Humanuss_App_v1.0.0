@@ -9,6 +9,26 @@
       "notes": "Solicitud preliminar 1",
       "daysToTake": 1,
       "status": "pendiente"
+    },
+    {
+      "id": 1751051403835,
+      "userId": "0000000005",
+      "type": "Vacación",
+      "date": "2025-07-04",
+      "range": "del 28 de junio al 28 de junio",
+      "notes": "Solicitud de prueba 2",
+      "daysToTake": 2,
+      "status": "pendiente"
+    },
+    {
+      "id": 1751051495141,
+      "userId": "0000000005",
+      "type": "Vacación",
+      "date": "2025-07-04",
+      "range": "del 28 de junio al 28 de junio",
+      "notes": "solicitud prueba 3",
+      "daysToTake": 1,
+      "status": "pendiente"
     }
   ],
   "marcajes": [
@@ -64,5 +84,11 @@
   ],
   "admins": [
     "0000000005"
+  ],
+  "empleados": [
+    {
+      "id": "0000000005",
+      "name": "Marcos Gustavo Cordon Lopez "
+    }
   ]
 }

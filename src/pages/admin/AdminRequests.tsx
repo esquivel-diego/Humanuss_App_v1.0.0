@@ -11,7 +11,7 @@ const AdminRequests = () => {
   const navigate = useNavigate()
   const requests = useRequestStore((state) => state.requests)
   const fetchRequests = useRequestStore((state) => state.fetchRequests)
-const updateRequestStatus = useRequestStore((state) => state.updateRequestStatus)
+  const updateRequestStatus = useRequestStore((state) => state.updateRequestStatus)
   const addNotification = useNotificationStore((state) => state.addNotification)
   const user = useAuthStore((state) => state.user)
 
@@ -93,21 +93,12 @@ const updateRequestStatus = useRequestStore((state) => state.updateRequestStatus
             <table className="w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-100 dark:bg-gray-700 text-left">
                 <tr>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Empleado
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Tipo
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Fecha
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-center text-gray-500 dark:text-gray-300">
-                    Acciones
-                  </th>
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Empleado</th>
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Tipo</th>
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Solicitud</th>
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">A gozar</th>
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Estado</th>
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-center text-gray-500 dark:text-gray-300">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -116,6 +107,7 @@ const updateRequestStatus = useRequestStore((state) => state.updateRequestStatus
                     <td className="px-6 py-4 text-sm">{getEmployeeName(req.userId)}</td>
                     <td className="px-6 py-4 text-sm">{req.type}</td>
                     <td className="px-6 py-4 text-sm">{req.date}</td>
+                    <td className="px-6 py-4 text-sm">{req.range || 'N/A'}</td>
                     <td className="px-6 py-4">
                       <span className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusColor(req.status)}`}>
                         {req.status.toUpperCase()}
@@ -145,8 +137,14 @@ const updateRequestStatus = useRequestStore((state) => state.updateRequestStatus
             {requests.map((req) => (
               <div key={req.id} className="card-bg rounded-2xl p-4 shadow flex flex-col gap-2 text-sm">
                 <div className="font-semibold">{getEmployeeName(req.userId)}</div>
-                <div>📄 Tipo: <span className="font-medium">{req.type}</span></div>
-                <div>📅 Fecha: {req.date}</div>
+                <div>📅 <strong>Fecha de solicitud:</strong> {req.date}</div>
+                <div>🗓️ <strong>Fechas a gozar:</strong> {req.range || 'N/A'}</div>
+                <div>📄 <strong>Tipo:</strong> {req.type}</div>
+                {req.notes && (
+                  <div className="text-sm italic text-gray-400 mt-1">
+                    📝 {req.notes}
+                  </div>
+                )}
                 <div>
                   <span className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusColor(req.status)}`}>
                     {req.status.toUpperCase()}

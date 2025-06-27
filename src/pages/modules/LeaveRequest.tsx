@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DateRangeModal from '@components/modals/DateRangeModal'
 import { createRequest } from '@services/requestService'
 import { useNotificationStore } from '@store/notificationStore'
@@ -11,9 +11,20 @@ const LeaveRequest = () => {
   const [submitted, setSubmitted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
   const [daysToTake, setDaysToTake] = useState<number | ''>('')
+  const [period, setPeriod] = useState('N/A')
 
   const user = useAuthStore.getState().user
   const { addNotification } = useNotificationStore()
+
+  // ✅ Determinar periodo actual basado en año vigente
+  useEffect(() => {
+    const fetchPeriod = () => {
+      const year = new Date().getFullYear()
+      setPeriod(`${year}-${year}`)
+    }
+
+    fetchPeriod()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,7 +92,7 @@ const LeaveRequest = () => {
                 </label>
                 <input
                   type="text"
-                  value="Vacación"
+                  value={period}
                   readOnly
                   className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
                 />
