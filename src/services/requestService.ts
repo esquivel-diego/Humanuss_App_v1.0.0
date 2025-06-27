@@ -6,11 +6,14 @@ import type { Request, RequestStatus } from '../types/requestTypes'
 
 // ✅ Obtener historial de solicitudes (vacaciones y permisos)
 export const getAllRequests = async (user: User): Promise<Request[]> => {
+  if (!user || !user.id) throw new Error("Usuario inválido")
+
   const res = await fetchJson(`/solicitudes?empleadoId=${user.id}`)
   if (!res || !Array.isArray(res.recordset)) {
     console.warn('⚠️ Respuesta inesperada al obtener solicitudes:', res)
     return []
   }
+
   return res.recordset
 }
 
@@ -69,7 +72,7 @@ export const createRequest = async (
     throw new Error('No se pudo enviar la solicitud oficial')
   }
 
-  // ✅ Guardar en el backend propio
+  // ✅ Guardar en el backend propio sin enviar token
   const localRequest = {
     userId: user.id,
     type: request.type,
@@ -82,6 +85,7 @@ export const createRequest = async (
   await fetchJson('/solicitudes', {
     method: 'POST',
     body: JSON.stringify(localRequest),
+    skipToken: true, // ← esto solo funcionará si lo agregas a tu `apiClient.ts`
   })
 }
 

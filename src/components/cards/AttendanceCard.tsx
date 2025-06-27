@@ -6,41 +6,42 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-} from "recharts";
-import type { RectangleProps } from "recharts";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@store/authStore";
-import { getWeeklyAttendance } from "@services/attendanceService";
+} from "recharts"
+import type { RectangleProps } from "recharts"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAuthStore } from "@store/authStore"
+import { useAttendanceStore } from "@store/attendanceStore"
 
 interface AttendanceBar {
-  name: string;
-  minutes: number;
-  label: string;
+  name: string
+  minutes: number
+  label: string
 }
 
 const AttendanceCard = () => {
-  const [chartData, setChartData] = useState<AttendanceBar[]>([]);
-  const [min, setMin] = useState(420); // 07:00
-  const [max, setMax] = useState(660); // 11:00
-  const [avgTime, setAvgTime] = useState("00:00");
+  const [chartData, setChartData] = useState<AttendanceBar[]>([])
+  const [min, setMin] = useState(420) // 07:00
+  const [max, setMax] = useState(660) // 11:00
+  const [avgTime, setAvgTime] = useState("00:00")
 
-  const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+  const getWeek = useAttendanceStore((state) => state.getWeek)
 
   const parseToMinutes = (time: string) => {
-    const [h, m] = time.split(":").map(Number);
-    return h * 60 + m;
-  };
+    const [h, m] = time.split(":").map(Number)
+    return h * 60 + m
+  }
 
   const formatHour = (m: number) => {
-    const h = Math.floor(m / 60);
-    const min = m % 60;
-    return `${h.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`;
-  };
+    const h = Math.floor(m / 60)
+    const min = m % 60
+    return `${h.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`
+  }
 
   const CustomBar = (props: RectangleProps) => {
-    const { x, y, width, height, fill } = props;
+    const { x, y, width, height, fill } = props
     return (
       <rect
         x={x! + (width! - 20) / 2}
@@ -51,50 +52,38 @@ const AttendanceCard = () => {
         rx={4}
         ry={4}
       />
-    );
-  };
+    )
+  }
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+    if (!user) return
 
-      try {
-        const attendance = await getWeeklyAttendance();
+    const attendance = getWeek(user.id)
 
-        if (!Array.isArray(attendance)) {
-          throw new Error("Respuesta inesperada del servidor");
-        }
+    if (!Array.isArray(attendance)) return
 
-        const checkIns = attendance
-          .map((d) => parseToMinutes(d.checkIn))
-          .filter((m) => !isNaN(m)); // Evita NaN
+    const checkIns = attendance
+      .map((d) => parseToMinutes(d.checkIn || ""))
+      .filter((m) => !isNaN(m))
 
-        if (checkIns.length === 0) return;
+    if (checkIns.length === 0) return
 
-        const adjustedMin = Math.min(...checkIns) - 15;
-        const adjustedMax = Math.max(...checkIns);
+    const adjustedMin = Math.min(...checkIns) - 15
+    const adjustedMax = Math.max(...checkIns)
 
-        const parsed: AttendanceBar[] = attendance.map((d) => ({
-          name: d.day.slice(0, 3),
-          minutes: parseToMinutes(d.checkIn),
-          label: d.checkIn,
-        }));
+    const parsed: AttendanceBar[] = attendance.map((d) => ({
+      name: d.day.slice(0, 3),
+      minutes: parseToMinutes(d.checkIn || "0:00"),
+      label: d.checkIn || "--:--",
+    }))
 
-        const avg = Math.round(
-          checkIns.reduce((a, b) => a + b, 0) / checkIns.length
-        );
+    const avg = Math.round(checkIns.reduce((a, b) => a + b, 0) / checkIns.length)
 
-        setAvgTime(formatHour(avg));
-        setChartData(parsed);
-        setMin(adjustedMin);
-        setMax(adjustedMax);
-      } catch (err) {
-        console.error("Error al cargar asistencia:", err);
-      }
-    };
-
-    fetchData();
-  }, [user]);
+    setAvgTime(formatHour(avg))
+    setChartData(parsed)
+    setMin(adjustedMin)
+    setMax(adjustedMax)
+  }, [user, getWeek])
 
   return (
     <div
@@ -154,7 +143,7 @@ const AttendanceCard = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AttendanceCard;
+export default AttendanceCard

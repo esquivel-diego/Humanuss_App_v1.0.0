@@ -1,4 +1,3 @@
-// backend/server.js
 import express from 'express'
 import cors from 'cors'
 import { join, dirname } from 'path'
@@ -7,35 +6,36 @@ import { Low } from 'lowdb'
 import { JSONFile } from 'lowdb'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-
-// Ruta a la base de datos JSON
 const dbFile = join(__dirname, 'db.json')
 const adapter = new JSONFile(dbFile)
 const db = new Low(adapter)
 
-// Inicializar servidor
 const app = express()
 const PORT = 4000
 
-// Middlewares
 app.use(cors())
 app.use(express.json())
 
-// Inicializar datos si no existen
+// Inicializar base de datos
 await db.read()
-db.data ||= { solicitudes: [] }
+db.data ||= {}
+db.data.solicitudes ||= []
+db.data.marcajes ||= []
+
+// ---------------------------
+// RUTAS SOLICITUDES
+// ---------------------------
 
 // GET /solicitudes?empleadoId=...
 app.get('/solicitudes', (req, res) => {
   const { empleadoId } = req.query
-
   if (!empleadoId) {
     return res.status(400).json({ error: 'Falta empleadoId' })
   }
 
-  const solicitudes = db.data.solicitudes?.filter(
+  const solicitudes = db.data.solicitudes.filter(
     (s) => s.userId === empleadoId
-  ) || []
+  )
 
   return res.json({ recordset: solicitudes })
 })
@@ -43,13 +43,12 @@ app.get('/solicitudes', (req, res) => {
 // POST /solicitudes
 app.post('/solicitudes', async (req, res) => {
   const solicitud = req.body
-
   if (!solicitud || !solicitud.userId || !solicitud.date || !solicitud.type) {
     return res.status(400).json({ error: 'Solicitud inválida' })
   }
 
   const nueva = {
-    id: Date.now(), // ID único temporal
+    id: Date.now(),
     ...solicitud,
   }
 
@@ -57,6 +56,46 @@ app.post('/solicitudes', async (req, res) => {
   await db.write()
 
   return res.status(201).json({ ok: true, solicitud: nueva })
+})
+
+// ---------------------------
+// RUTAS MARCAJES
+// ---------------------------
+
+// POST /marcajes
+app.post('/marcajes', async (req, res) => {
+  const { empleadoId, fecha, hora, tipo } = req.body
+
+  if (!empleadoId || !fecha || !hora || !['E', 'S'].includes(tipo)) {
+    return res.status(400).json({ error: 'Marcaje inválido' })
+  }
+
+  const marcaje = {
+    id: Date.now(),
+    empleadoId,
+    fecha,
+    hora,
+    tipo,
+  }
+
+  db.data.marcajes.push(marcaje)
+  await db.write()
+
+  return res.status(201).json({ ok: true, marcaje })
+})
+
+// GET /marcajes/:empleadoId
+app.get('/marcajes/:empleadoId', (req, res) => {
+  const { empleadoId } = req.params
+  if (!empleadoId) {
+    return res.status(400).json({ error: 'Falta empleadoId' })
+  }
+
+  const registros = db.data.marcajes.filter(
+    (m) => m.empleadoId === empleadoId
+  )
+
+  return res.json({ recordset: registros })
 })
 
 // Iniciar servidor

@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-// import type { AttendanceDay } from '@services/attendanceService'
 import { getWeeklyAttendance } from '@services/attendanceService'
 import type { User } from '@services/authService'
 
@@ -40,16 +39,41 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
   records: loadFromStorage(),
 
   fetchWeek: async (user) => {
+    if (!user || !user.id) {
+      console.warn('⚠️ Usuario inválido en fetchWeek')
+      return
+    }
+
     try {
-      const data = await getWeeklyAttendance()
+      const apiData = await getWeeklyAttendance()
+      const localData = get().records[user.id] || []
+
+      // Fusionar por día, dando prioridad a marcajes locales
+      const merged = apiData.map(apiDay => {
+        const localDay = localData.find(ld => ld.day === apiDay.day)
+        return {
+          day: apiDay.day,
+          checkIn: localDay?.checkIn || apiDay.checkIn || undefined,
+          checkOut: localDay?.checkOut || apiDay.checkOut || undefined,
+        }
+      })
+
+      // Agregar cualquier día marcado localmente que no esté en el API
+      const extraLocalDays = localData.filter(ld =>
+        !merged.some(md => md.day === ld.day)
+      )
+
+      const finalWeek = [...merged, ...extraLocalDays]
+
       const newRecords = {
         ...get().records,
-        [user.id]: data,
+        [user.id]: finalWeek,
       }
+
       set({ records: newRecords })
       saveToStorage(newRecords)
     } catch (error) {
-      console.error('Error al cargar asistencia:', error)
+      console.error('❌ Error al cargar asistencia semanal:', error)
     }
   },
 

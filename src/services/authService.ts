@@ -1,6 +1,5 @@
 // src/services/authService.ts
 import CryptoJS from 'crypto-js'
-import { fetchJson } from '@utils/apiClient'
 
 export type User = {
   id: string
@@ -15,7 +14,7 @@ export type User = {
 const BASE_URL = 'https://nominapayone.com/api_demo2/login'
 
 export const login = async (email: string, password: string): Promise<User> => {
-  // Paso 1: Obtener llave dinámica
+  // Paso 1: Obtener clave AES dinámica
   const keyRes = await fetch(`${BASE_URL}/OBTENER`)
   const keyData = await keyRes.json()
   const llave = keyData?.Data
@@ -24,7 +23,7 @@ export const login = async (email: string, password: string): Promise<User> => {
   // Paso 2: Cifrar contraseña
   const encryptedPassword = CryptoJS.AES.encrypt(password, llave).toString()
 
-  // Paso 3: Enviar login
+  // Paso 3: Enviar credenciales
   const response = await fetch(`${BASE_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -42,15 +41,10 @@ export const login = async (email: string, password: string): Promise<User> => {
   const token = data?.token
   if (!record || !token) throw new Error('Respuesta incompleta del servidor')
 
-  // 🟢 Guardar el token ANTES de usar fetchJson
+  // Paso 4: Guardar el token para futuras peticiones
   localStorage.setItem('TOKENLOG', token)
 
-  // Paso 4: Obtener datos del empleado
-  const empleadoId = record?.EMPLEADO_ID || record?.USER_ID || email
-  const fullData = await fetchJson(`/empleado/${empleadoId}?token=${token}`)
-  const empleado = fullData?.recordset?.[0]
-
-  // Paso 5: Obtener imagen en base64 (si está disponible)
+  // Paso 5: Obtener imagen (opcional)
   let photoUrl = ''
   try {
     const imgRes = await fetch(`https://nominapayone.com/api_demo2/empleado/IMAGEN?token=${token}`)
@@ -69,19 +63,22 @@ export const login = async (email: string, password: string): Promise<User> => {
     console.warn('⚠️ No se pudo obtener imagen del usuario:', err)
   }
 
-  // Paso 6: Armar objeto User
+  // Paso 6: Armar objeto de usuario
   const user: User = {
-    id: empleado?.EMPLEADO_ID ?? empleadoId,
-    name: empleado?.NOMBRE ?? record?.NOMBRE,
-    username: record?.USER_ID ?? email,
-    role: empleado?.PERFIL_ID === 1 ? 'admin' : 'employee',
+    id: record.EMPLEADO_ID,
+    name: record.NOMBRE,
+    username: record.USER_ID ?? email,
+    role: record.PERFIL_ID === 1 ? 'admin' : 'employee',
     token,
-    position: empleado?.PUESTO ?? '',
+    position: record.PUESTO ?? '',
     photoUrl,
   }
 
   // Paso 7: Guardar usuario en localStorage
-  localStorage.setItem('USUARIOLOG', JSON.stringify([user]))
+  localStorage.setItem('authUser', JSON.stringify(user))
+  localStorage.setItem('USUARIOLOG', JSON.stringify(user))
+  localStorage.setItem('USER_EMAIL', email)
+  localStorage.setItem('USER_PASSWORD_ENCRYPTED', encryptedPassword)
 
   return user
 }
