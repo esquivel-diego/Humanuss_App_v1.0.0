@@ -100,6 +100,10 @@ app.get('/marcajes/:empleadoId', (req, res) => {
   return res.json({ recordset: registros })
 })
 
+// ---------------------------
+// RUTAS DE USUARIOS Y EMPLEADOS
+// ---------------------------
+
 // GET /admin-users
 app.get('/admin-users', (req, res) => {
   res.json({ ids: db.data.admins || [] })
@@ -110,24 +114,32 @@ app.get('/empleados', (req, res) => {
   res.json({ recordset: db.data.empleados || [] })
 })
 
-// POST /empleados
+// POST /empleados (crear o actualizar)
 app.post('/empleados', async (req, res) => {
   const nuevo = req.body
   if (!nuevo || !nuevo.id || !nuevo.name) {
     return res.status(400).json({ error: 'Empleado inválido' })
   }
 
-  const existe = db.data.empleados.some((e) => e.id === nuevo.id)
-  if (existe) {
-    return res.status(200).json({ ok: true, mensaje: 'Empleado ya existe' })
+  const nuevoEmpleado = {
+    id: nuevo.id,
+    name: nuevo.name,
+    position: nuevo.position ?? '',
+    email: nuevo.email ?? '',
+    photoUrl: nuevo.photoUrl ?? '',
   }
 
-  db.data.empleados.push(nuevo)
+  const index = db.data.empleados.findIndex((e) => e.id === nuevo.id)
+
+  if (index >= 0) {
+    db.data.empleados[index] = nuevoEmpleado // 🔁 Actualizar
+  } else {
+    db.data.empleados.push(nuevoEmpleado) // ➕ Agregar nuevo
+  }
+
   await db.write()
-
-  return res.status(201).json({ ok: true, empleado: nuevo })
+  return res.status(201).json({ ok: true, empleado: nuevoEmpleado })
 })
-
 
 // Iniciar servidor
 app.listen(PORT, () => {

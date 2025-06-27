@@ -14,15 +14,15 @@ export type User = {
 
 const BASE_URL = 'https://nominapayone.com/api_demo2/login'
 
-// ✅ NUEVA FUNCIÓN
+// ✅ FUNCIÓN ACTUALIZADA: guarda todos los datos del usuario en backend local
 const registerUserLocally = async (user: User) => {
   try {
     const res = await fetchJson('/empleados', {
       skipToken: true,
-      forceLocal: true
+      forceLocal: true,
     })
 
-    const empleados: { id: string; name: string }[] = res.recordset ?? []
+    const empleados: { id: string }[] = res.recordset ?? []
     const yaExiste = empleados.some((e) => e.id === user.id)
 
     if (!yaExiste) {
@@ -30,7 +30,13 @@ const registerUserLocally = async (user: User) => {
         method: 'POST',
         skipToken: true,
         forceLocal: true,
-        body: JSON.stringify({ id: user.id, name: user.name })
+        body: JSON.stringify({
+          id: user.id,
+          name: user.name,
+          position: user.position || '',
+          email: user.username,
+          photoUrl: user.photoUrl || '',
+        }),
       })
     }
   } catch (err) {
@@ -59,6 +65,7 @@ export const login = async (email: string, password: string): Promise<User> => {
   }
 
   const data = await response.json()
+
   const record = data?.recordset?.[0]
   const token = data?.token
   if (!record || !token) throw new Error('Respuesta incompleta del servidor')
@@ -98,7 +105,6 @@ export const login = async (email: string, password: string): Promise<User> => {
   localStorage.setItem('USER_EMAIL', email)
   localStorage.setItem('USER_PASSWORD_ENCRYPTED', encryptedPassword)
 
-  // ✅ REGISTRAR EN BACKEND LOCAL SI NO EXISTE
   await registerUserLocally(user)
 
   return user

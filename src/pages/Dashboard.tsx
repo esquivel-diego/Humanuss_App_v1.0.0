@@ -32,7 +32,7 @@ const Dashboard = () => {
           src={
             user?.photoUrl && user.photoUrl.trim() !== ''
               ? user.photoUrl
-              : 'src/assets/perfil.png'
+              : 'default-avatar.svg'
           }
           alt="Foto de perfil"
           className="w-14 h-14 rounded-full object-cover shadow-md cursor-pointer hover:brightness-110 transition"

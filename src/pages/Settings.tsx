@@ -30,30 +30,24 @@ const Settings = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return
+
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/empleado/${user.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        )
+        const res = await fetch(`http://localhost:4000/empleados`)
         const data = await res.json()
-        const raw = data?.recordset?.[0]
-        if (!raw) return
+        const empleado = data?.recordset?.find((e: any) => e.id === user.id)
+        if (!empleado) return
 
         const parsed: UserProfile = {
-          userId: raw.EMPLEADO_ID,
-          name: raw.NOMBRE,
-          position: raw.PUESTO,
-          photoUrl: raw.FOTO_URL || '/default-avatar.png',
+          userId: empleado.id,
+          name: empleado.name,
+          position: empleado.position || '',
+          photoUrl: empleado.photoUrl || '/default-avatar.svg',
           contact: {
-            address: raw.DIRECCION,
-            phone: raw.TELEFONO_RESIDENCIAL,
-            mobile: raw.TELEFONO_MOVIL,
-            email: raw.CORREO_ELECTRONICO,
-            startDate: raw.FECHA_INGRESO,
+            address: empleado.address || '',
+            phone: empleado.phone || '',
+            mobile: empleado.mobile || '',
+            email: empleado.email || '',
+            startDate: empleado.startDate || '',
           },
         }
 
@@ -75,7 +69,7 @@ const Settings = () => {
         className="card-bg rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 shadow min-h-[120px] text-center md:text-left cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
       >
         <img
-          src={profile.photoUrl}
+          src={profile.photoUrl || '/default-avatar.svg'}
           alt="Foto de perfil"
           className="w-40 h-40 md:w-20 md:h-20 rounded-full object-cover border"
         />
