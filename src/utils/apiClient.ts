@@ -47,10 +47,11 @@ const refreshToken = async (): Promise<string> => {
  */
 export const apiClient = async (
   path: string,
-  options: RequestInit & { skipToken?: boolean } = {},
+  options: RequestInit & { skipToken?: boolean; forceLocal?: boolean } = {},
   retry = true
 ): Promise<Response> => {
   const skipToken = options.skipToken === true
+  const forceLocal = options.forceLocal === true
   let token = skipToken ? null : getToken()
 
   if (!skipToken && !token) {
@@ -59,6 +60,7 @@ export const apiClient = async (
 
   const isFullUrl = path.startsWith('http')
   const isLocalRequest =
+    forceLocal ||
     path.startsWith('/solicitudes') ||
     path.startsWith('/notificaciones') ||
     path.startsWith('/marcajes')
@@ -88,7 +90,7 @@ export const apiClient = async (
   if (response.status === 401 && !skipToken && retry) {
     try {
       await refreshToken()
-      return apiClient(path, { ...options, skipToken }, false)
+      return apiClient(path, { ...options, skipToken, forceLocal }, false)
     } catch (err) {
       console.error('❌ No se pudo refrescar token:', err)
       throw err
@@ -100,7 +102,7 @@ export const apiClient = async (
 
 export const fetchJson = async <T = any>(
   path: string,
-  options: RequestInit & { skipToken?: boolean } = {}
+  options: RequestInit & { skipToken?: boolean; forceLocal?: boolean } = {}
 ): Promise<T> => {
   const res = await apiClient(path, options)
 

@@ -21,7 +21,7 @@ await db.read()
 db.data ||= {}
 db.data.solicitudes ||= []
 db.data.marcajes ||= []
-
+db.data.admins ||= []
 // ---------------------------
 // RUTAS SOLICITUDES
 // ---------------------------
@@ -96,6 +96,11 @@ app.get('/marcajes/:empleadoId', (req, res) => {
   )
 
   return res.json({ recordset: registros })
+})
+
+// GET /admin-users
+app.get('/admin-users', (req, res) => {
+  res.json({ ids: db.data.admins || [] })
 })
 
 // Iniciar servidor

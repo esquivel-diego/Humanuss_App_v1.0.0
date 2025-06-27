@@ -68,23 +68,9 @@ const AppRouter = () => {
           {/* ✅ Ruta de notificaciones accesible para todos los usuarios */}
           <Route path="/notificaciones" element={<Notifications />} />
 
-          {/* ✅ Rutas exclusivas para administradores */}
-          <Route
-            path="/admin/solicitudes"
-            element={
-              <PrivateRoute allowedRoles={['admin']}>
-                <AdminRequests />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin/noticias"
-            element={
-              <PrivateRoute allowedRoles={['admin']}>
-                <AdminNews />
-              </PrivateRoute>
-            }
-          />
+          {/* ✅ Rutas de administrador ahora visibles solo si se muestran desde el sidebar */}
+          <Route path="/admin/solicitudes" element={<AdminRequests />} />
+          <Route path="/admin/noticias" element={<AdminNews />} />
         </Route>
       </Routes>
     </BrowserRouter>

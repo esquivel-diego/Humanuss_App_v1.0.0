@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useState } from 'react'
+// src/components/layout/Sidebar.tsx
+import React, { useLayoutEffect, useState, useEffect } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import {
   Moon, Sun, Menu, LayoutDashboard, Settings, Boxes,
@@ -6,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useNotificationStore } from '../../store/notificationStore'
+import { getAdminIds } from '@services/adminService'
 import { cn } from '@utils/cn'
 
 type MenuItem = {
@@ -26,6 +28,19 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('light')
   const [activeMenu, setActiveMenu] = useState<'main' | 'modules' | 'rrhh'>('main')
+  const [adminIds, setAdminIds] = useState<string[]>([])
+
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const ids = await getAdminIds()
+        setAdminIds(ids)
+      } catch (err) {
+        console.error('Error al obtener adminIds:', err)
+      }
+    }
+    fetchAdmins()
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -48,8 +63,10 @@ const Sidebar = () => {
   }
 
   const unreadCount = notifications.filter(
-  (n) => !n.read && String(n.userId) === user?.id
-).length
+    (n) => !n.read && String(n.userId) === user?.id
+  ).length
+
+  const isAdmin = user && adminIds.includes(user.id)
 
   const mainMenu: MenuItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
@@ -69,7 +86,7 @@ const Sidebar = () => {
     { label: 'Modulos', icon: <Boxes size={18} />, action: () => setActiveMenu('modules') }
   ]
 
-  if (user?.role === 'admin') {
+  if (isAdmin) {
     mainMenu.push(
       { path: '/admin/solicitudes', label: 'Solicitudes', icon: <FileText size={18} /> },
       { path: '/admin/noticias', label: 'Publicar noticias', icon: <Megaphone size={18} /> }
