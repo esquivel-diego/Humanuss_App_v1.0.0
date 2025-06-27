@@ -3,6 +3,9 @@ import DateRangeModal from '@components/modals/DateRangeModal'
 import { createRequest } from '@services/requestService'
 import { useNotificationStore } from '@store/notificationStore'
 import { useAuthStore } from '@store/authStore'
+import { getVacationIndicators } from '@services/vacationService'
+
+const truncate1Decimal = (num: number) => Math.trunc(num * 10) / 10
 
 const LeaveRequest = () => {
   const [requestDate, setRequestDate] = useState('')
@@ -11,19 +14,27 @@ const LeaveRequest = () => {
   const [submitted, setSubmitted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
   const [daysToTake, setDaysToTake] = useState<number | ''>('')
-  const [period, setPeriod] = useState('N/A')
+  const [availableDaysRaw, setAvailableDaysRaw] = useState<number | null>(null)
 
   const user = useAuthStore.getState().user
   const { addNotification } = useNotificationStore()
 
-  // ✅ Determinar periodo actual basado en año vigente
+  const currentYear = new Date().getFullYear()
+  const periodoActual = `${currentYear}-${currentYear + 1}`
+
   useEffect(() => {
-    const fetchPeriod = () => {
-      const year = new Date().getFullYear()
-      setPeriod(`${year}-${year}`)
+    const fetchDays = async () => {
+      try {
+        const indicators = await getVacationIndicators()
+        const disponibles = indicators.cantidad - indicators.diasGozados
+        const truncado = truncate1Decimal(disponibles)
+        setAvailableDaysRaw(truncado)
+      } catch (err) {
+        console.warn('No se pudieron cargar los días disponibles:', err)
+      }
     }
 
-    fetchPeriod()
+    fetchDays()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +103,7 @@ const LeaveRequest = () => {
                 </label>
                 <input
                   type="text"
-                  value={period}
+                  value={periodoActual}
                   readOnly
                   className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
                 />
@@ -125,7 +136,11 @@ const LeaveRequest = () => {
                     Días disponibles
                   </label>
                   <input
-                    value="9"
+                    value={
+                      availableDaysRaw === null
+                        ? 'Cargando...'
+                        : availableDaysRaw.toFixed(1).padStart(4, '0')
+                    }
                     disabled
                     className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
                   />
