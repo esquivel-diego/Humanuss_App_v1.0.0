@@ -19,7 +19,7 @@ export const getAllRequests = async (user: User): Promise<Request[]> => {
 export const createRequest = async (
   user: User,
   request: {
-    type: 'Vacación' | 'Permiso'
+    type: string
     date: string
     range: string
     notes?: string

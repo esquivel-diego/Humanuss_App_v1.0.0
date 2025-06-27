@@ -29,6 +29,26 @@
       "notes": "solicitud prueba 3",
       "daysToTake": 1,
       "status": "pendiente"
+    },
+    {
+      "id": 1751059285473,
+      "userId": "0000000005",
+      "type": "Permiso",
+      "date": "2025-07-04",
+      "range": "del 28 de junio al 30 de junio",
+      "notes": "ausencia prueba",
+      "daysToTake": 0,
+      "status": "pendiente"
+    },
+    {
+      "id": 1751059668378,
+      "userId": "0000000005",
+      "type": "Permiso",
+      "date": "2025-06-27",
+      "range": "del 28 de junio al 30 de junio",
+      "notes": "Tipo de ausencia: Personal. Medico general",
+      "daysToTake": 0,
+      "status": "pendiente"
     }
   ],
   "marcajes": [
@@ -79,6 +99,13 @@
       "empleadoId": "0000000005",
       "fecha": "2025-06-27",
       "hora": "11:40",
+      "tipo": "E"
+    },
+    {
+      "id": 1751058363887,
+      "empleadoId": "0000000005",
+      "fecha": "2025-06-27",
+      "hora": "15:06",
       "tipo": "E"
     }
   ],

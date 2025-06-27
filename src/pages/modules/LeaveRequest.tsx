@@ -5,7 +5,7 @@ import { useNotificationStore } from '@store/notificationStore'
 import { useAuthStore } from '@store/authStore'
 import { getVacationIndicators } from '@services/vacationService'
 
-const truncate1Decimal = (num: number) => Math.trunc(num * 10) / 10
+const truncate1Decimal = (num: number) => Math.floor(num * 10) / 10
 
 const LeaveRequest = () => {
   const [requestDate, setRequestDate] = useState('')
@@ -22,20 +22,22 @@ const LeaveRequest = () => {
   const currentYear = new Date().getFullYear()
   const periodoActual = `${currentYear}-${currentYear + 1}`
 
-  useEffect(() => {
-    const fetchDays = async () => {
-      try {
-        const indicators = await getVacationIndicators()
-        const disponibles = indicators.cantidad - indicators.diasGozados
-        const truncado = truncate1Decimal(disponibles)
-        setAvailableDaysRaw(truncado)
-      } catch (err) {
-        console.warn('No se pudieron cargar los días disponibles:', err)
-      }
+useEffect(() => {
+  const fetchDays = async () => {
+    try {
+      const indicators = await getVacationIndicators()
+      const tomados = truncate1Decimal(indicators.diasGozados ?? 0)
+      const cantidad = truncate1Decimal(indicators.cantidad ?? 0)
+      const disponibles = truncate1Decimal(cantidad - tomados)
+      setAvailableDaysRaw(disponibles)
+    } catch (err) {
+      console.warn('No se pudieron cargar los días disponibles:', err)
     }
+  }
 
-    fetchDays()
-  }, [])
+  fetchDays()
+}, [])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,10 +138,11 @@ const LeaveRequest = () => {
                     Días disponibles
                   </label>
                   <input
+                    type="text"
                     value={
                       availableDaysRaw === null
                         ? 'Cargando...'
-                        : availableDaysRaw.toFixed(1).padStart(4, '0')
+                        : truncate1Decimal(availableDaysRaw).toFixed(1).padStart(4, '0')
                     }
                     disabled
                     className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"

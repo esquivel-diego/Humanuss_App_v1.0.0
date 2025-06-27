@@ -25,12 +25,11 @@ const AbsenceRequest = () => {
 
     try {
       await createRequest(user, {
-        type: 'Vacación',
+        type: absenceType,
         date: requestDate,
         range: dates,
         notes,
       })
-
 
       addNotification({
         userId: user.id,
@@ -79,15 +78,27 @@ const AbsenceRequest = () => {
                   Tipo de ausencia
                 </label>
                 <select
-                  value={absenceType}
-                  onChange={(e) => setAbsenceType(e.target.value)}
-                  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
-                  required
-                >
-                  <option value="">Selecciona una opción</option>
-                  <option value="Vacación">Vacación</option>
-                  <option value="Permiso">Permiso</option>
-                </select>
+  value={absenceType}
+  onChange={(e) => setAbsenceType(e.target.value)}
+  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none appearance-none relative z-10"
+  required
+  style={{
+    backgroundPosition: 'right 1rem center',
+    backgroundRepeat: 'no-repeat',
+    backgroundImage: 'url("data:image/svg+xml,%3Csvg fill=\'%23ccc\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E")',
+    backgroundSize: '1rem',
+  }}
+>
+  <option value="">Selecciona una opción</option>
+  <option value="Médico">Médico</option>
+  <option value="Personal">Personal</option>
+  <option value="Luto">Luto</option>
+  <option value="Matrimonio">Matrimonio</option>
+  <option value="Maternidad/Paternidad">Maternidad/Paternidad</option>
+  <option value="Citación judicial">Citación judicial</option>
+  <option value="Otros">Otros</option>
+</select>
+
               </div>
 
               <div>
