@@ -1,6 +1,3 @@
-// src/services/employeeService.ts
-
-import type { User } from './authService'
 import { fetchJson } from '@utils/apiClient'
 
 export type Empleado = {
@@ -8,10 +5,11 @@ export type Empleado = {
   name: string
 }
 
-export const getAllEmployees = async (_user?: User): Promise<Empleado[]> => {
-  const data = await fetchJson('/EMPLEADO')
-  return (data?.recordset ?? []).map((emp: any) => ({
-    id: emp.EMPLEADO_ID,
-    name: emp.NOMBRE,
-  }))
+export const getAllEmployees = async (): Promise<Empleado[]> => {
+  const res = await fetchJson('/empleados', {
+    skipToken: true,
+    forceLocal: true
+  })
+
+  return res.recordset ?? []
 }

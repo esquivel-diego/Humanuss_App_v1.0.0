@@ -24,7 +24,7 @@ const updateRequestStatus = useRequestStore((state) => state.updateRequestStatus
 
     const loadEmployees = async () => {
       try {
-        const all = await getAllEmployees(user)
+        const all = await getAllEmployees()
         setEmployees(all)
       } catch (err) {
         console.error('Error cargando empleados:', err)

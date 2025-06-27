@@ -1,5 +1,6 @@
 // src/services/authService.ts
 import CryptoJS from 'crypto-js'
+import { fetchJson } from '@utils/apiClient'
 
 export type User = {
   id: string
@@ -13,17 +14,38 @@ export type User = {
 
 const BASE_URL = 'https://nominapayone.com/api_demo2/login'
 
+// ✅ NUEVA FUNCIÓN
+const registerUserLocally = async (user: User) => {
+  try {
+    const res = await fetchJson('/empleados', {
+      skipToken: true,
+      forceLocal: true
+    })
+
+    const empleados: { id: string; name: string }[] = res.recordset ?? []
+    const yaExiste = empleados.some((e) => e.id === user.id)
+
+    if (!yaExiste) {
+      await fetchJson('/empleados', {
+        method: 'POST',
+        skipToken: true,
+        forceLocal: true,
+        body: JSON.stringify({ id: user.id, name: user.name })
+      })
+    }
+  } catch (err) {
+    console.warn('⚠️ No se pudo registrar el usuario en el backend local:', err)
+  }
+}
+
 export const login = async (email: string, password: string): Promise<User> => {
-  // Paso 1: Obtener clave AES dinámica
   const keyRes = await fetch(`${BASE_URL}/OBTENER`)
   const keyData = await keyRes.json()
   const llave = keyData?.Data
   if (!llave) throw new Error('No se pudo obtener la clave de cifrado')
 
-  // Paso 2: Cifrar contraseña
   const encryptedPassword = CryptoJS.AES.encrypt(password, llave).toString()
 
-  // Paso 3: Enviar credenciales
   const response = await fetch(`${BASE_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -41,10 +63,8 @@ export const login = async (email: string, password: string): Promise<User> => {
   const token = data?.token
   if (!record || !token) throw new Error('Respuesta incompleta del servidor')
 
-  // Paso 4: Guardar el token para futuras peticiones
   localStorage.setItem('TOKENLOG', token)
 
-  // Paso 5: Obtener imagen (opcional)
   let photoUrl = ''
   try {
     const imgRes = await fetch(`https://nominapayone.com/api_demo2/empleado/IMAGEN?token=${token}`)
@@ -63,7 +83,6 @@ export const login = async (email: string, password: string): Promise<User> => {
     console.warn('⚠️ No se pudo obtener imagen del usuario:', err)
   }
 
-  // Paso 6: Armar objeto de usuario
   const user: User = {
     id: record.EMPLEADO_ID,
     name: record.NOMBRE,
@@ -74,11 +93,13 @@ export const login = async (email: string, password: string): Promise<User> => {
     photoUrl,
   }
 
-  // Paso 7: Guardar usuario en localStorage
   localStorage.setItem('authUser', JSON.stringify(user))
   localStorage.setItem('USUARIOLOG', JSON.stringify(user))
   localStorage.setItem('USER_EMAIL', email)
   localStorage.setItem('USER_PASSWORD_ENCRYPTED', encryptedPassword)
+
+  // ✅ REGISTRAR EN BACKEND LOCAL SI NO EXISTE
+  await registerUserLocally(user)
 
   return user
 }

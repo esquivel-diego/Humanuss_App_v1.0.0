@@ -1,5 +1,16 @@
 {
-  "solicitudes": [],
+  "solicitudes": [
+    {
+      "id": 1751046326474,
+      "userId": "0000000005",
+      "type": "Vacación",
+      "date": "2025-06-26",
+      "range": "del 28 de junio al 28 de junio",
+      "notes": "Solicitud preliminar 1",
+      "daysToTake": 1,
+      "status": "pendiente"
+    }
+  ],
   "marcajes": [
     {
       "id": 1751040012038,
@@ -42,6 +53,13 @@
       "fecha": "2025-06-27",
       "hora": "11:31",
       "tipo": "S"
+    },
+    {
+      "id": 1751046058654,
+      "empleadoId": "0000000005",
+      "fecha": "2025-06-27",
+      "hora": "11:40",
+      "tipo": "E"
     }
   ],
   "admins": [

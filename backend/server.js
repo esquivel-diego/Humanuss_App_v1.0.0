@@ -22,6 +22,8 @@ db.data ||= {}
 db.data.solicitudes ||= []
 db.data.marcajes ||= []
 db.data.admins ||= []
+db.data.empleados ||= []
+
 // ---------------------------
 // RUTAS SOLICITUDES
 // ---------------------------
@@ -102,6 +104,30 @@ app.get('/marcajes/:empleadoId', (req, res) => {
 app.get('/admin-users', (req, res) => {
   res.json({ ids: db.data.admins || [] })
 })
+
+// GET /empleados
+app.get('/empleados', (req, res) => {
+  res.json({ recordset: db.data.empleados || [] })
+})
+
+// POST /empleados
+app.post('/empleados', async (req, res) => {
+  const nuevo = req.body
+  if (!nuevo || !nuevo.id || !nuevo.name) {
+    return res.status(400).json({ error: 'Empleado inválido' })
+  }
+
+  const existe = db.data.empleados.some((e) => e.id === nuevo.id)
+  if (existe) {
+    return res.status(200).json({ ok: true, mensaje: 'Empleado ya existe' })
+  }
+
+  db.data.empleados.push(nuevo)
+  await db.write()
+
+  return res.status(201).json({ ok: true, empleado: nuevo })
+})
+
 
 // Iniciar servidor
 app.listen(PORT, () => {

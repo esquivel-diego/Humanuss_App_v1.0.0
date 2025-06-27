@@ -6,11 +6,11 @@ import { useAuthStore } from '@store/authStore'
 
 const LeaveRequest = () => {
   const [requestDate, setRequestDate] = useState('')
-  const [absenceType, setAbsenceType] = useState('')
   const [dates, setDates] = useState('')
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
+  const [daysToTake, setDaysToTake] = useState<number | ''>('')
 
   const user = useAuthStore.getState().user
   const { addNotification } = useNotificationStore()
@@ -18,7 +18,7 @@ const LeaveRequest = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!user || !user.id || !requestDate || !absenceType || !dates) {
+    if (!user || !user.id || !requestDate || !dates) {
       alert('Completa todos los campos obligatorios.')
       return
     }
@@ -29,9 +29,8 @@ const LeaveRequest = () => {
         date: requestDate,
         range: dates,
         notes,
+        daysToTake: typeof daysToTake === 'number' ? daysToTake : 0,
       })
-
-
 
       addNotification({
         userId: user.id,
@@ -44,9 +43,9 @@ const LeaveRequest = () => {
       setTimeout(() => setSubmitted(false), 5000)
 
       setRequestDate('')
-      setAbsenceType('')
       setDates('')
       setNotes('')
+      setDaysToTake('')
     } catch (error) {
       console.error('Error al enviar solicitud:', error)
       alert('❌ Ocurrió un error al enviar la solicitud.')
@@ -82,11 +81,9 @@ const LeaveRequest = () => {
                 </label>
                 <input
                   type="text"
-                  value={absenceType}
-                  onChange={(e) => setAbsenceType(e.target.value)}
-                  placeholder="type here"
+                  value="Vacación"
+                  readOnly
                   className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
-                  required
                 />
               </div>
 
@@ -128,7 +125,8 @@ const LeaveRequest = () => {
                   </label>
                   <input
                     type="number"
-                    placeholder="type here"
+                    value={daysToTake}
+                    onChange={(e) => setDaysToTake(Number(e.target.value))}
                     className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
                   />
                 </div>
