@@ -1,19 +1,24 @@
 // src/services/requestService.ts
-
 import { fetchJson } from '@utils/apiClient'
 import type { User } from './authService'
 import type { Request, RequestStatus } from '../types/requestTypes'
 
-export const getAllRequests = async (user: User): Promise<Request[]> => {
-  if (!user || !user.id) throw new Error("Usuario inválido")
+export const getAllRequests = async (user?: User): Promise<Request[]> => {
+  // Evita llamadas al backend local por defecto
+  const useLocal = (import.meta as any).env?.VITE_USE_LOCAL_REQUESTS === 'true'
+  if (!useLocal) return []
 
-  const res = await fetchJson(`/solicitudes?empleadoId=${user.id}`)
-  if (!res || !Array.isArray(res.recordset)) {
-    console.warn('⚠️ Respuesta inesperada al obtener solicitudes:', res)
+  if (!user || !user.id) return []
+  try {
+    const res = await fetchJson(`/solicitudes?empleadoId=${user.id}`, {
+      skipToken: true,
+      forceLocal: true,
+    })
+    if (!res || !Array.isArray(res.recordset)) return []
+    return res.recordset as Request[]
+  } catch {
     return []
   }
-
-  return res.recordset
 }
 
 export const createRequest = async (

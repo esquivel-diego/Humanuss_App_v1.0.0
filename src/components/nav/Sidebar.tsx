@@ -36,7 +36,9 @@ const Sidebar = () => {
         const ids = await getAdminIds()
         setAdminIds(ids)
       } catch (err) {
-        console.error('Error al obtener adminIds:', err)
+        // Evita ruido en consola si el backend local no está corriendo
+        console.warn('No se pudieron obtener adminIds (silenciado durante la migración).')
+        setAdminIds([])
       }
     }
     fetchAdmins()
@@ -66,7 +68,7 @@ const Sidebar = () => {
     (n) => !n.read && String(n.userId) === user?.id
   ).length
 
-  const isAdmin = user && adminIds.includes(user.id)
+  const isAdmin = !!(user && adminIds.includes(user.id))
 
   const mainMenu: MenuItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
