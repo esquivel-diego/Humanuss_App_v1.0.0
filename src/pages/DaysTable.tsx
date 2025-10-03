@@ -2,11 +2,35 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
-import { getAllRequests } from '@services/requestService'
-import type { Request } from '@services/requestService'
+import { getRequestIndicators } from '@services/indicatorService'
+
+type Row = {
+  number: number
+  type: string
+  status: string
+  date: string
+}
+
+const formatDate = (iso?: string | null) => {
+  if (!iso) return '--'
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return '--'
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yyyy = d.getFullYear()
+  return `${dd}/${mm}/${yyyy}`
+}
+
+const mapStatus = (code?: string): string => {
+  const c = (code ?? '').toUpperCase()
+  if (c === 'A') return 'APROBADA'
+  if (c === 'R') return 'RECHAZADA'
+  if (c === 'P' || c === 'E') return 'PENDIENTE'
+  return 'PENDIENTE'
+}
 
 const DaysTable = () => {
-  const [requests, setRequests] = useState<Request[]>([])
+  const [requests, setRequests] = useState<Row[]>([])
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
 
@@ -15,16 +39,24 @@ const DaysTable = () => {
       if (!user) return
 
       try {
-        const all = await getAllRequests(user)
-        const filtered = all.filter(
-          (r) => r.type === 'Vacación' || r.type === 'Permiso'
-        )
-        const sorted = filtered.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        )
-        setRequests(sorted)
+        const records = await getRequestIndicators()
+        const mapped: Row[] = records
+          .map((r) => ({
+            number: r.NUMERO,
+            type: r.TIPO ?? '-',
+            status: mapStatus(r.ESTADO),
+            date: formatDate(r.FECHA),
+          }))
+          .sort(
+            (a, b) =>
+              new Date(b.date.split('/').reverse().join('-')).getTime() -
+              new Date(a.date.split('/').reverse().join('-')).getTime()
+          )
+
+        setRequests(mapped)
       } catch (error) {
         console.error('Error al cargar solicitudes:', error)
+        setRequests([])
       }
     }
 
@@ -32,7 +64,7 @@ const DaysTable = () => {
   }, [user])
 
   return (
-    <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative">
+    <div className="min-h-screen text-gray-900 dark:text-gray-100 p-6 relative pb-20">
       <button
         onClick={() => navigate('/')}
         className="fixed bottom-4 right-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"
@@ -46,12 +78,14 @@ const DaysTable = () => {
           Solicitudes de Días
         </div>
 
-        <div className="card-bg shadow-xl rounded-2xl overflow-x-auto overflow-y-auto max-h-[70vh]">
-          <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
+        {/* En móviles dejamos crecer en alto; en md+ limitamos a 70vh. */}
+        <div className="card-bg shadow-xl rounded-2xl overflow-x-auto overflow-y-auto w-full md:max-h-[70vh]">
+          {/* Quitamos min-w fija para permitir que el contenido envuelva en pantallas pequeñas */}
+          <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700 w-full">
             <thead className="bg-gray-100 dark:bg-gray-700 text-left">
               <tr>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                  Fechas
+                  Nº Solicitud
                 </th>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
                   Tipo
@@ -62,16 +96,13 @@ const DaysTable = () => {
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 whitespace-nowrap">
                   Solicitado el
                 </th>
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                  Motivo
-                </th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {requests.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-6 text-sm text-center text-gray-400">
+                  <td colSpan={4} className="px-6 py-6 text-sm text-center text-gray-400">
                     No hay solicitudes registradas.
                   </td>
                 </tr>
@@ -86,23 +117,31 @@ const DaysTable = () => {
                       : 'bg-yellow-100 text-yellow-700'
 
                   return (
-                    <tr
-                      key={i}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                    >
-                      <td className="px-6 py-4 text-sm whitespace-nowrap">{req.range}</td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap">{req.type}</td>
-                      <td className="px-6 py-4">
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                      <td className="px-6 py-4 text-sm whitespace-nowrap">{req.number}</td>
+
+                      {/* Tipo: permitir 2 líneas máximo y corte elegante */}
+                      <td className="px-6 py-4 text-sm align-top">
                         <span
-                          className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor}`}
+                          className="block leading-snug"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            wordBreak: 'break-word',
+                          }}
                         >
+                          {req.type}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor}`}>
                           {statusUpper}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm whitespace-nowrap">{req.date}</td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap">
-                        {req.notes || '-'}
-                      </td>
                     </tr>
                   )
                 })
