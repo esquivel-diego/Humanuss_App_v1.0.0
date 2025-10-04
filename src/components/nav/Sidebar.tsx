@@ -30,13 +30,18 @@ const Sidebar = () => {
   const [activeMenu, setActiveMenu] = useState<'main' | 'modules' | 'rrhh'>('main')
   const [adminIds, setAdminIds] = useState<string[]>([])
 
+  // 🔒 Feature flags (ambos ocultos por defecto)
+  const SHOW_RRHH_REQUESTS =
+    (import.meta as any).env?.VITE_SHOW_RRHH_REQUESTS === 'true'
+  const SHOW_NEWS_MODULE =
+    (import.meta as any).env?.VITE_SHOW_NEWS_MODULE === 'true'
+
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
         const ids = await getAdminIds()
         setAdminIds(ids)
-      } catch (err) {
-        // Evita ruido en consola si el backend local no está corriendo
+      } catch {
         console.warn('No se pudieron obtener adminIds (silenciado durante la migración).')
         setAdminIds([])
       }
@@ -99,8 +104,12 @@ const Sidebar = () => {
     { label: 'Atrás', icon: <ArrowLeft size={18} />, action: () => setActiveMenu('main'), isPrimary: true },
     { path: '/modules/vacaciones', label: 'Vacaciones', icon: <Plane size={18} /> },
     { path: '/modules/ausencias', label: 'Ausencias', icon: <CalendarX size={18} /> },
-    { label: 'Solicitudes RRHH', icon: <FileText size={18} />, action: () => setActiveMenu('rrhh') },
-    { path: '/modules/novedades', label: 'Noticias', icon: <Megaphone size={18} /> }
+    ...(SHOW_RRHH_REQUESTS
+      ? [{ label: 'Solicitudes RRHH', icon: <FileText size={18} />, action: () => setActiveMenu('rrhh') }] 
+      : []),
+    ...(SHOW_NEWS_MODULE
+      ? [{ path: '/modules/novedades', label: 'Noticias', icon: <Megaphone size={18} /> }]
+      : []),
   ]
 
   const rrhhMenu: MenuItem[] = [
@@ -109,9 +118,12 @@ const Sidebar = () => {
     { path: '/modules/rrhh/income-certification', label: 'Income Certification', icon: <FileText size={18} /> }
   ]
 
+  const effectiveActive =
+    activeMenu === 'rrhh' && !SHOW_RRHH_REQUESTS ? 'modules' : activeMenu
+
   const currentMenu =
-    activeMenu === 'main' ? mainMenu :
-    activeMenu === 'modules' ? moduleMenu :
+    effectiveActive === 'main' ? mainMenu :
+    effectiveActive === 'modules' ? moduleMenu :
     rrhhMenu
 
   return (
