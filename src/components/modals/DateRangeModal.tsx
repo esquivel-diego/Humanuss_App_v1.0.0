@@ -9,9 +9,20 @@ interface Props {
   isOpen: boolean
   onClose: () => void
   onSelectRange: (rangeText: string) => void
+  /**
+   * Opcional: si se provee, emitirá también las fechas inicio/fin en YYYY-MM-DD (local).
+   */
+  onSelectRangeDetailed?: (args: { start: string; end: string; label: string }) => void
 }
 
-const DateRangeModal = ({ isOpen, onClose, onSelectRange }: Props) => {
+const toLocalYMD = (d: Date): string => {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+const DateRangeModal = ({ isOpen, onClose, onSelectRange, onSelectRangeDetailed }: Props) => {
   const [selectionRange, setSelectionRange] = useState({
     startDate: new Date(),
     endDate: new Date(),
@@ -25,9 +36,18 @@ const DateRangeModal = ({ isOpen, onClose, onSelectRange }: Props) => {
 
   const handleApply = () => {
     const { startDate, endDate } = selectionRange
-    const format = (d: Date) => d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })
-    const rangeText = `del ${format(startDate)} al ${format(endDate)}`
-    onSelectRange(rangeText)
+    const fmt = (d: Date) => d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })
+    const label = `del ${fmt(startDate)} al ${fmt(endDate)}`
+    onSelectRange(label)
+
+    if (onSelectRangeDetailed) {
+      onSelectRangeDetailed({
+        start: toLocalYMD(startDate),
+        end: toLocalYMD(endDate),
+        label,
+      })
+    }
+
     onClose()
   }
 

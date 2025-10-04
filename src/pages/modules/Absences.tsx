@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import DateRangeModal from '@components/modals/DateRangeModal'
-import { createRequest } from '@services/requestService'
 import { useNotificationStore } from '@store/notificationStore'
 import { useAuthStore } from '@store/authStore'
+import {
+  postAusenciaSolicitud,
+  mapAbsenceTypeToCode,
+  type AusenciaTipo,
+} from '@services/absenceService'
 
 const AbsenceRequest = () => {
   const [requestDate, setRequestDate] = useState('')
-  const [absenceType, setAbsenceType] = useState('')
+  const [absenceType, setAbsenceType] = useState<AusenciaTipo | ''>('')
   const [dates, setDates] = useState('')
+  const [startDate, setStartDate] = useState('') // YYYY-MM-DD
+  const [endDate, setEndDate] = useState('')     // YYYY-MM-DD
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -18,18 +24,33 @@ const AbsenceRequest = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!user || !user.id || !requestDate || !absenceType || !dates) {
+    if (!user || !user.id) {
+      alert('Usuario no válido.')
+      return
+    }
+    if (!requestDate || !absenceType || !dates) {
       alert('Completa todos los campos obligatorios.')
       return
     }
+    if (!startDate || !endDate) {
+      alert('Selecciona el rango de fechas en el calendario.')
+      return
+    }
+
+    const payload = {
+      CODIGO_MOT: mapAbsenceTypeToCode(absenceType),
+      FECHA_SOLICITUD: requestDate,   // YYYY-MM-DD (input)
+      FECHA_AUSENTE_I_SOL: startDate, // inicio rango (del modal)
+      FECHA_AUSENTE_F_SOL: endDate,   // fin rango (del modal)
+      OBSERVACIONES: notes || '',
+      TIPO_SOLICITUD: 'P' as const,   // Permiso
+      USUARIO_GENERO: '12345',
+    }
+
+    console.log('📤 POST /v2/AUSENCIA_SOLICITUD payload:', payload)
 
     try {
-      await createRequest(user, {
-        type: absenceType,
-        date: requestDate,
-        range: dates,
-        notes,
-      })
+      await postAusenciaSolicitud(payload)
 
       addNotification({
         userId: user.id,
@@ -40,13 +61,17 @@ const AbsenceRequest = () => {
 
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 5000)
+
+      // reset
       setRequestDate('')
       setAbsenceType('')
       setDates('')
+      setStartDate('')
+      setEndDate('')
       setNotes('')
     } catch (error) {
-      alert('❌ Hubo un error al enviar la solicitud.')
-      console.error(error)
+      console.error('❌ Error al enviar ausencia:', error)
+      alert('❌ Hubo un error al enviar la solicitud. Revisa la consola.')
     }
   }
 
@@ -78,27 +103,27 @@ const AbsenceRequest = () => {
                   Tipo de ausencia
                 </label>
                 <select
-  value={absenceType}
-  onChange={(e) => setAbsenceType(e.target.value)}
-  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none appearance-none relative z-10"
-  required
-  style={{
-    backgroundPosition: 'right 1rem center',
-    backgroundRepeat: 'no-repeat',
-    backgroundImage: 'url("data:image/svg+xml,%3Csvg fill=\'%23ccc\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E")',
-    backgroundSize: '1rem',
-  }}
->
-  <option value="">Selecciona una opción</option>
-  <option value="Médico">Médico</option>
-  <option value="Personal">Personal</option>
-  <option value="Luto">Luto</option>
-  <option value="Matrimonio">Matrimonio</option>
-  <option value="Maternidad/Paternidad">Maternidad/Paternidad</option>
-  <option value="Citación judicial">Citación judicial</option>
-  <option value="Otros">Otros</option>
-</select>
-
+                  value={absenceType}
+                  onChange={(e) => setAbsenceType(e.target.value as AusenciaTipo)}
+                  className="w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none appearance-none relative z-10"
+                  required
+                  style={{
+                    backgroundPosition: 'right 1rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundImage:
+                      'url("data:image/svg+xml,%3Csvg fill=\'%23ccc\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M7 10l5 5 5-5z\'/%3E%3C/svg%3E")',
+                    backgroundSize: '1rem',
+                  }}
+                >
+                  <option value="">Selecciona una opción</option>
+                  <option value="Médico">Médico</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Luto">Luto</option>
+                  <option value="Matrimonio">Matrimonio</option>
+                  <option value="Maternidad/Paternidad">Maternidad/Paternidad</option>
+                  <option value="Citación judicial">Citación judicial</option>
+                  <option value="Otros">Otros</option>
+                </select>
               </div>
 
               <div>
@@ -119,7 +144,12 @@ const AbsenceRequest = () => {
               <DateRangeModal
                 isOpen={showCalendar}
                 onClose={() => setShowCalendar(false)}
-                onSelectRange={(range) => setDates(range)}
+                onSelectRange={(label) => setDates(label)}
+                onSelectRangeDetailed={({ start, end, label }) => {
+                  setDates(label)
+                  setStartDate(start) // YYYY-MM-DD
+                  setEndDate(end)     // YYYY-MM-DD
+                }}
               />
 
               <div>
