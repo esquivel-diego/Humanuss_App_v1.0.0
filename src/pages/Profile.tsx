@@ -1,3 +1,4 @@
+// src/pages/Profile.tsx
 import {
   Accordion,
   AccordionContent,
@@ -6,24 +7,20 @@ import {
 } from '@components/ui/accordion'
 import { useAuthStore } from '@store/authStore'
 import { useEffect, useState } from 'react'
-import { apiClient } from '@utils/apiClient'
+import { getAuthenticatedEmployeeV2 } from '@services/employeeService'
 
 interface ContactInfo {
   address: string
   phone: string
-  mobile: string
   email: string
-  startDate: string
 }
 
 interface UserProfile {
-  userId: number
+  userId: string | number
   name: string
   position: string
   photoUrl: string
   contact: ContactInfo
-  experience?: string
-  education?: string
 }
 
 const Profile = () => {
@@ -36,32 +33,19 @@ const Profile = () => {
       if (!user?.id) return
 
       try {
-        const res = await apiClient(`/empleado/${user.id}`)
-
-        if (!res.ok || !res.headers.get('content-type')?.includes('application/json')) {
-          const text = await res.text()
-          console.error('Respuesta inesperada:', text)
-          throw new Error('Error en la respuesta del servidor')
-        }
-
-        const data = await res.json()
-        const record = data?.recordset?.[0]
+        const { record, photoDataUrl } = await getAuthenticatedEmployeeV2()
         if (!record) return
 
         const mapped: UserProfile = {
-          userId: record.EMPLEADO_ID,
-          name: record.NOMBRE,
-          position: record.PUESTO || 'Colaborador',
-          photoUrl: record.FOTO_URL || 'https://i.pravatar.cc/300',
+          userId: user.id,
+          name: (record.NOMBRE_USUAL || user.name || '').trim(),
+          position: record.DESCRIPCION_PUESTO || user.position || 'Colaborador',
+          photoUrl: photoDataUrl || user.photoUrl || 'https://i.pravatar.cc/300',
           contact: {
-            address: record.DIRECCION || 'No disponible',
-            phone: record.TEL_FIJO || 'N/A',
-            mobile: record.TEL_MOVIL || 'N/A',
-            email: record.EMAIL || 'N/A',
-            startDate: record.FECHA_INGRESO || new Date().toISOString(),
+            address: record.DIRECCION_DOMICILIO || 'No disponible',
+            phone: record.TELEFONO || 'N/A',
+            email: record.DIRECCION_EMAIL || 'N/A',
           },
-          experience: record.EXPERIENCIA || '',
-          education: record.EDUCACION || '',
         }
 
         setProfile(mapped)
@@ -85,10 +69,11 @@ const Profile = () => {
             className="w-28 h-28 rounded-full object-cover border-4 border-white dark:border-gray-700 absolute left-1/2 -translate-x-1/2 -top-14 shadow-md cursor-pointer"
             onClick={() => setShowFullImage(true)}
           />
-          <h2 className="text-xl font-semibold mt-4">{profile.name}</h2>
+        <h2 className="text-xl font-semibold mt-4">{profile.name}</h2>
           <p className="text-gray-500 dark:text-gray-400">{profile.position}</p>
         </div>
 
+        {/* Solo CONTACTO */}
         <Accordion type="single" collapsible className="space-y-4">
           <AccordionItem value="contacto">
             <AccordionTrigger className="hover:no-underline hover:text-blue-500 hover:scale-[1.01] transition-all">
@@ -97,36 +82,7 @@ const Profile = () => {
             <AccordionContent className="space-y-1 text-sm">
               <div>📍 {profile.contact.address}</div>
               <div>📞 {profile.contact.phone}</div>
-              <div>📱 {profile.contact.mobile}</div>
               <div>✉️ {profile.contact.email}</div>
-              <div>📅 {new Date(profile.contact.startDate).toLocaleDateString()}</div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="experiencia">
-            <AccordionTrigger className="hover:no-underline hover:text-blue-500 hover:scale-[1.01] transition-all">
-              EXPERIENCIA
-            </AccordionTrigger>
-            <AccordionContent>
-              {profile.experience || 'Información de experiencia laboral del colaborador.'}
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="educacion">
-            <AccordionTrigger className="hover:no-underline hover:text-blue-500 hover:scale-[1.01] transition-all">
-              EDUCACIÓN
-            </AccordionTrigger>
-            <AccordionContent>
-              {profile.education || 'Formación académica, cursos o certificaciones.'}
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="organigrama">
-            <AccordionTrigger className="hover:no-underline hover:text-blue-500 hover:scale-[1.01] transition-all">
-              ORGANIGRAMA
-            </AccordionTrigger>
-            <AccordionContent>
-              Visualización del organigrama futuro.
             </AccordionContent>
           </AccordionItem>
         </Accordion>
