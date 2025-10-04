@@ -7,10 +7,12 @@ import CheckInCard from '@components/cards/CheckInCard'
 import CheckOutCard from '@components/cards/CheckOutCard'
 import { useAuthStore } from '@store/authStore'
 import { fetchJson } from '@utils/apiClient'
+import { useNotificationStore } from '@store/notificationStore' // ✅ agregado
 
 const Dashboard = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  const notifications = useNotificationStore((state) => state.notifications) // ✅ agregado
 
   const [displayName, setDisplayName] = useState<string>(user?.name ?? 'Usuario')
   const [puesto, setPuesto] = useState<string>(
@@ -19,6 +21,11 @@ const Dashboard = () => {
   const [photoUrl, setPhotoUrl] = useState<string | null>(
     user?.photoUrl && user.photoUrl.trim() !== '' ? user.photoUrl : null
   )
+
+  // ✅ no leídas del usuario (para el punto rojo en móvil)
+  const unreadCount = notifications.filter(
+    (n) => !n.read && String(n.userId) === user?.id
+  ).length
 
   useEffect(() => {
     document.title = 'Humanuss | Dashboard'
@@ -130,12 +137,23 @@ const Dashboard = () => {
             {puesto || (user?.role === 'admin' ? 'Administrador' : 'Colaborador')}
           </p>
         </div>
-        <img
-          onClick={() => navigate('/profile')}
-          src={avatar}
-          alt="Foto de perfil"
-          className="w-14 h-14 rounded-full object-cover shadow-md cursor-pointer hover:brightness-110 transition"
-        />
+
+        {/* ✅ Contenedor relativo para el badge rojo en móvil */}
+        <div className="relative">
+          {unreadCount > 0 && (
+            <span
+              className="md:hidden absolute -top-0 -right-0 w-3 h-3 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900"
+              aria-label="Notificaciones no leídas"
+            />
+          )}
+
+          <img
+            onClick={() => navigate('/profile')}
+            src={avatar}
+            alt="Foto de perfil"
+            className="w-14 h-14 rounded-full object-cover shadow-md cursor-pointer hover:brightness-110 transition"
+          />
+        </div>
       </div>
 
       {/* Fila 1: Days + Payroll */}
