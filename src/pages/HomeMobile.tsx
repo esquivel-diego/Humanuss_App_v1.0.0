@@ -1,0 +1,8 @@
+const HomeMobile = () => {
+  return (
+    <div className="h-full flex items-center justify-center text-center">
+      <h1 className="text-2xl font-bold">🏠 Vista Home (móvil)</h1>
+    </div>
+  )
+}
+export default HomeMobile

@@ -1,3 +1,4 @@
+// src/router/AppRouter.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import PrivateRoute from './PrivateRoute'
@@ -17,12 +18,17 @@ import NewsDetail from '../pages/modules/NewsDetail'
 import WorkCertificateRequest from '../pages/modules/rrhh/WorkCertificateRequest'
 import IncomeCertificationRequest from '../pages/modules/rrhh/IncomeCertificationRequest'
 
-// ✅ Importa vistas de administración
+// ✅ Admin
 import AdminRequests from '../pages/admin/AdminRequests'
 import AdminNews from '../pages/admin/AdminNews'
 
-// ✅ Importa la nueva vista de notificaciones
+// ✅ Notificaciones
 import Notifications from '../pages/Notifications'
+
+// ✅ NUEVAS vistas móviles (placeholders)
+import HomeMobile from '../pages/HomeMobile'
+import SettingsMobile from '../pages/SettingsMobile'
+import ModulesMobile from '../pages/ModulesMobile'
 
 const AppRouter = () => {
   const user = useAuthStore((state) => state.user)
@@ -51,6 +57,7 @@ const AppRouter = () => {
             </PrivateRoute>
           }
         >
+          {/* App principal */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/attendance" element={<AttendanceTable />} />
           <Route path="/days" element={<DaysTable />} />
@@ -58,6 +65,8 @@ const AppRouter = () => {
           <Route path="/payroll/:index" element={<PayrollDetail />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
+
+          {/* Módulos */}
           <Route path="/modules/vacaciones" element={<LeaveRequest />} />
           <Route path="/modules/ausencias" element={<Absences />} />
           <Route path="/modules/novedades" element={<News />} />
@@ -65,12 +74,17 @@ const AppRouter = () => {
           <Route path="/modules/rrhh/work-certificate" element={<WorkCertificateRequest />} />
           <Route path="/modules/rrhh/income-certification" element={<IncomeCertificationRequest />} />
 
-          {/* ✅ Ruta de notificaciones accesible para todos los usuarios */}
+          {/* Notificaciones */}
           <Route path="/notificaciones" element={<Notifications />} />
 
-          {/* ✅ Rutas de administrador ahora visibles solo si se muestran desde el sidebar */}
+          {/* Admin */}
           <Route path="/admin/solicitudes" element={<AdminRequests />} />
           <Route path="/admin/noticias" element={<AdminNews />} />
+
+          {/* ====== Rutas móviles (placeholders) ====== */}
+          <Route path="/mobile/home" element={<HomeMobile />} />
+          <Route path="/mobile/settings" element={<SettingsMobile />} />
+          <Route path="/mobile/modules" element={<ModulesMobile />} />
         </Route>
       </Routes>
     </BrowserRouter>
