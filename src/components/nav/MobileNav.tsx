@@ -9,23 +9,23 @@ import { useMemo } from 'react'
  * - Íconos centrados y distribuidos equitativamente
  */
 const MobileNav = () => {
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
+    const navigate = useNavigate()
+    const { pathname } = useLocation()
 
-  const items = useMemo(
-    () => [
-      { key: 'settings', icon: Settings, path: '/mobile/settings' },
-      { key: 'home', icon: Home, path: '/dashboard' }, // ✅ Ahora redirige a dashboard
-      { key: 'modules', icon: Boxes, path: '/mobile/modules' },
-    ],
-    []
-  )
+    const items = useMemo(
+        () => [
+            { key: 'settings', icon: Settings, path: '/settings' }, // ✅ Ahora dirige a Settings.tsx
+            { key: 'home', icon: Home, path: '/dashboard' }, // ✅ Mantiene redirección a dashboard
+            { key: 'modules', icon: Boxes, path: '/mobile/modules' },
+        ],
+        []
+    )
 
-  const isActive = (path: string) => pathname === path
+    const isActive = (path: string) => pathname === path
 
-  return (
-    <nav
-      className="
+    return (
+        <nav
+            className="
         md:hidden
         fixed
         bottom-4
@@ -33,45 +33,45 @@ const MobileNav = () => {
         right-3
         z-50
       "
-      style={{
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-      aria-label="Menú móvil"
-    >
-      <div
-        className="
+            style={{
+                paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
+            aria-label="Menú móvil"
+        >
+            <div
+                className="
           w-full
           bg-[#0d2347] text-white
           rounded-full shadow-xl
           px-6 py-3
           flex items-center justify-between
         "
-      >
-        {items.map(({ key, icon: Icon, path }) => {
-          const active = isActive(path)
-          return (
-            <button
-              key={key}
-              onClick={() => navigate(path)}
-              className={`
+            >
+                {items.map(({ key, icon: Icon, path }) => {
+                    const active = isActive(path)
+                    return (
+                        <button
+                            key={key}
+                            onClick={() => navigate(path)}
+                            className={`
                 flex items-center justify-center
                 w-1/3 h-10
                 rounded-full transition
                 focus:outline-none
                 ${active ? 'bg-blue-600/90 shadow-md' : 'hover:bg-white/10'}
               `}
-              aria-label={key}
-            >
-              <Icon
-                size={24}
-                className={`${active ? 'text-blue-300 scale-110' : 'text-white'} transition-transform`}
-              />
-            </button>
-          )
-        })}
-      </div>
-    </nav>
-  )
+                            aria-label={key}
+                        >
+                            <Icon
+                                size={24}
+                                className={`${active ? 'text-blue-300 scale-110' : 'text-white'} transition-transform`}
+                            />
+                        </button>
+                    )
+                })}
+            </div>
+        </nav>
+    )
 }
 
 export default MobileNav
