@@ -1,3 +1,4 @@
+// src/store/attendanceStore.ts
 import { create } from 'zustand'
 import { getWeeklyAttendance } from '@services/attendanceService'
 import type { User } from '@services/authService'
@@ -45,6 +46,7 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
     }
 
     try {
+      // Fuente única: API v2 (última semana lunes-domingo)
       const apiData = await getWeeklyAttendance()
       const localData = get().records[user.id] || []
 
@@ -58,7 +60,7 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
         }
       })
 
-      // Agregar cualquier día marcado localmente que no esté en el API
+      // Agregar días locales que no lleguen desde API (raro, pero preservamos)
       const extraLocalDays = localData.filter(ld =>
         !merged.some(md => md.day === ld.day)
       )

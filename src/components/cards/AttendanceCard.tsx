@@ -28,8 +28,10 @@ const AttendanceCard = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const getWeek = useAttendanceStore((state) => state.getWeek)
+  const fetchWeek = useAttendanceStore((state) => state.fetchWeek)
 
   const parseToMinutes = (time: string) => {
+    if (!time) return NaN
     const [h, m] = time.split(":").map(Number)
     return h * 60 + m
   }
@@ -57,10 +59,14 @@ const AttendanceCard = () => {
 
   useEffect(() => {
     if (!user) return
+    // Asegura que la semana esté cargada desde v2 antes de dibujar
+    fetchWeek(user)
+  }, [user, fetchWeek])
 
+  useEffect(() => {
+    if (!user) return
     const attendance = getWeek(user.id)
-
-    if (!Array.isArray(attendance)) return
+    if (!Array.isArray(attendance) || attendance.length === 0) return
 
     const checkIns = attendance
       .map((d) => parseToMinutes(d.checkIn || ""))
