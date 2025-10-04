@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@hooks/useTheme'
 import ChangePasswordModal from '@components/modals/ChangePasswordModal'
 import { useAuthStore } from '@store/authStore'
+import { getAuthenticatedEmployeeV2 } from '@services/employeeService'
 
 interface ContactInfo {
   address: string
@@ -32,28 +33,48 @@ const Settings = () => {
       if (!user) return
 
       try {
-        const res = await fetch(`http://localhost:4000/empleados`)
-        const data = await res.json()
-        const empleado = data?.recordset?.find((e: any) => e.id === user.id)
-        if (!empleado) return
+        // Preferimos API oficial v2
+        const { record, photoDataUrl } = await getAuthenticatedEmployeeV2()
+
+        // Fallback con datos de authStore si algo viene vacío
+        const name = record?.NOMBRE_USUAL?.trim() || user.name || ''
+        const position = record?.DESCRIPCION_PUESTO || user.position || ''
+        const email = record?.DIRECCION_EMAIL || user.username || ''
+        const phone = record?.TELEFONO || ''
+        const address = record?.DIRECCION_DOMICILIO || ''
+        const photoUrl = photoDataUrl || user.photoUrl || '/default-avatar.svg'
 
         const parsed: UserProfile = {
-          userId: empleado.id,
-          name: empleado.name,
-          position: empleado.position || '',
-          photoUrl: empleado.photoUrl || '/default-avatar.svg',
+          userId: String(user.id),
+          name,
+          position,
+          photoUrl,
           contact: {
-            address: empleado.address || '',
-            phone: empleado.phone || '',
-            mobile: empleado.mobile || '',
-            email: empleado.email || '',
-            startDate: empleado.startDate || '',
+            address,
+            phone,
+            mobile: '', // no disponible en v2
+            email,
+            startDate: '', // no disponible en v2
           },
         }
 
         setProfile(parsed)
       } catch (err) {
-        console.error('Error al cargar perfil:', err)
+        console.error('Error al cargar perfil (v2):', err)
+        // Si falla v2, al menos muestra algo con authStore
+        setProfile({
+          userId: String(user.id),
+          name: user.name,
+          position: user.position || '',
+          photoUrl: user.photoUrl || '/default-avatar.svg',
+          contact: {
+            address: '',
+            phone: '',
+            mobile: '',
+            email: user.username,
+            startDate: '',
+          },
+        })
       }
     }
 
