@@ -2,14 +2,19 @@ import { fetchJson } from "@utils/apiClient"
 
 export type MarcajeTipo = "E" | "S"
 
+/** Body oficial v2 */
 export interface MarcajeV2Body {
   LATITUD: number | null
   LONGITUD: number | null
   ID_DISPOSITIVO: string
-  ENTRADASALIDA: MarcajeTipo
-  FECHA_REGISTRO: string // YYYY-MM-DD (LOCAL)
+  ENTRADASALIDA: string // "001" para entrada, "" para salida
+  FECHA_REGISTRO: string // ISO UTC con Z, e.g. "2025-10-05T06:39:04.000Z"
 }
 
+/** Genera fecha en ISO UTC con 'Z' */
+export const isoNowUtc = () => new Date().toISOString()
+
+/** POST oficial: /v2/MARCAJE  (apiClient antepone /api/portal y agrega ?token=...) */
 export const postMarcajeV2 = async (data: MarcajeV2Body): Promise<any> => {
   const res = await fetchJson("/v2/MARCAJE", {
     method: "POST",
@@ -40,7 +45,7 @@ export const toUtcYMD = (d = new Date()) => {
   return `${y}-${m}-${day}`
 }
 
-/** Intenta leer asistencia para fecha local; si no hay, intenta UTC; si no, null */
+/** GET asistencia: /v2/ASISTENCIA/:from/:to  (apiClient antepone /api/portal y agrega ?token=...) */
 export const getAsistenciaDeHoy = async (now = new Date()): Promise<DayAttendance | null> => {
   const local = toLocalYMD(now)
   const utc = toUtcYMD(now)

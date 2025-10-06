@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { LogOut } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 import { useAttendanceStore } from '@store/attendanceStore'
-import { getAsistenciaDeHoy, postMarcajeV2, toLocalYMD } from '@services/marcajeService'
+import { getAsistenciaDeHoy, postMarcajeV2, isoNowUtc } from '@services/marcajeService'
 
 const CheckOutCard = () => {
   const [time, setTime] = useState<string | null>(null)
@@ -24,17 +24,15 @@ const CheckOutCard = () => {
     if (time && !confirm('Ya registraste tu salida. ¿Deseas volver a marcar?')) return
 
     const now = new Date()
-    const hora = now.toTimeString().slice(0,5)
-    const fechaLocal = toLocalYMD(now)
+    const hora = now.toTimeString().slice(0,5) // HH:mm para tu store/UI
     const today = capitalize(getCurrentDayName())
 
     try {
-      // Backend (local y fallback UTC)
+      // Verificación gentil (mantengo tu lógica actual)
       const todayAtt = await getAsistenciaDeHoy(now)
       const hasInBackend = !!todayAtt?.HORA_ENTRADA
       const hasOutBackend = !!todayAtt?.HORA_SALIDA
 
-      // Store local
       const todayLocal = getWeek(user.id).find(d => d.day === today)
       const hasInLocal = !!todayLocal?.checkIn
       const hasOutLocal = !!todayLocal?.checkOut
@@ -53,17 +51,20 @@ const CheckOutCard = () => {
       }
 
       const payload = {
-        LATITUD: 0.0,
-        LONGITUD: 0.0,
-        ID_DISPOSITIVO: 'HUMANUSS_WEBAPP',
-        ENTRADASALIDA: 'S' as const,
-        FECHA_REGISTRO: fechaLocal, // <-- local
-      }
-      console.log('📤 POST /v2/MARCAJE (S):', payload)
+        LATITUD: null,
+        LONGITUD: null,
+        ID_DISPOSITIVO: '',
+        ENTRADASALIDA: '',             // <- salida (cadena vacía)
+        FECHA_REGISTRO: isoNowUtc(),   // <- ISO UTC con Z
+      } as const
+      console.log('📤 POST /api/portal/v2/MARCAJE (S):', payload)
       const res = await postMarcajeV2(payload)
       console.log('✅ Respuesta marcaje (S):', res)
 
+      // Store / localStorage (sin tocar la estética ni el flujo existente)
       markCheckOut(user.id, today, hora)
+
+      // Refresca semana para AttendanceCard/AttendanceTable
       await fetchWeek(user)
 
       const updated = getWeek(user.id).find(d => d.day === today)

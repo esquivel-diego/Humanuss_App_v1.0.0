@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { LogIn } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 import { useAttendanceStore } from '@store/attendanceStore'
-import { postMarcajeV2, toLocalYMD } from '@services/marcajeService'
+import { postMarcajeV2, isoNowUtc } from '@services/marcajeService'
 
 const CheckInCard = () => {
   const [time, setTime] = useState<string | null>(null)
@@ -24,24 +24,26 @@ const CheckInCard = () => {
     if (time && !confirm('Ya registraste tu entrada. ¿Deseas volver a marcar?')) return
 
     const now = new Date()
-    const hora = now.toTimeString().slice(0,5)
-    const fechaLocal = toLocalYMD(now)
+    const hora = now.toTimeString().slice(0,5) // HH:mm para tu store/UI
     const today = capitalize(getCurrentDayName())
 
     const payload = {
-      LATITUD: 0.0,
-      LONGITUD: 0.0,
-      ID_DISPOSITIVO: 'HUMANUSS_WEBAPP',
-      ENTRADASALIDA: 'E' as const,
-      FECHA_REGISTRO: fechaLocal,
-    }
-    console.log('📤 POST /v2/MARCAJE (E):', payload)
+      LATITUD: null,
+      LONGITUD: null,
+      ID_DISPOSITIVO: '',
+      ENTRADASALIDA: '001',            // <- entrada
+      FECHA_REGISTRO: isoNowUtc(),     // <- ISO UTC con Z
+    } as const
+    console.log('📤 POST /api/portal/v2/MARCAJE (E):', payload)
 
     try {
       const res = await postMarcajeV2(payload)
       console.log('✅ Respuesta marcaje (E):', res)
 
+      // Store / localStorage (sin tocar la estética ni el flujo existente)
       markCheckIn(user.id, today, hora)
+
+      // Refresca semana para AttendanceCard/AttendanceTable
       await fetchWeek(user)
 
       const updated = getWeek(user.id).find(d => d.day === today)
