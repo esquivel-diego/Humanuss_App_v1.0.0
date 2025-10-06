@@ -170,7 +170,7 @@ const PayrollDetail = () => {
     <div className="min-h-screen text-gray-900 dark:text-white p-6 relative">
       <button
         onClick={() => navigate("/payroll")}
-        className="fixed bottom-4 right-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"
+        className="fixed right-4 bottom-24 md:bottom-4 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 transition shadow-lg"
         aria-label="Volver"
       >
         <ArrowLeft className="w-6 h-6 text-white" />
