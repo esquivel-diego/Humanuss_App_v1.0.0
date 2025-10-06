@@ -7,14 +7,23 @@ export interface MarcajeV2Body {
   LATITUD: number | null
   LONGITUD: number | null
   ID_DISPOSITIVO: string
-  ENTRADASALIDA: string // "001" para entrada, "" para salida
-  FECHA_REGISTRO: string // ISO UTC con Z, e.g. "2025-10-05T06:39:04.000Z"
+  ENTRADASALIDA: string // "001" entrada, "" salida
+  FECHA_REGISTRO: string // ISO con 'Z' pero usando la HORA LOCAL
 }
 
-/** Genera fecha en ISO UTC con 'Z' */
-export const isoNowUtc = () => new Date().toISOString()
+/** ISO con 'Z' usando la HORA LOCAL (no UTC) */
+export const isoLocalClockAsZ = (d = new Date()): string => {
+  const pad = (n: number) => String(n).padStart(2, "0")
+  const y = d.getFullYear()
+  const m = pad(d.getMonth() + 1)
+  const day = pad(d.getDate())
+  const hh = pad(d.getHours())
+  const mm = pad(d.getMinutes())
+  const ss = pad(d.getSeconds())
+  return `${y}-${m}-${day}T${hh}:${mm}:${ss}.000Z`
+}
 
-/** POST oficial: /v2/MARCAJE  (apiClient antepone /api/portal y agrega ?token=...) */
+/** POST oficial: /v2/MARCAJE (apiClient antepone /api/portal y agrega ?token=) */
 export const postMarcajeV2 = async (data: MarcajeV2Body): Promise<any> => {
   const res = await fetchJson("/v2/MARCAJE", {
     method: "POST",
