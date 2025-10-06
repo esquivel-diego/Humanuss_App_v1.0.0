@@ -24,19 +24,17 @@ const toYMD = (d: Date): string => {
   return `${y}-${m}-${day}`
 }
 
-// Lunes a domingo de la semana ANTERIOR (semana completa previa)
-const getLastWeekRange = (today = new Date()): { start: string; end: string } => {
+// Semana ACTUAL de lunes (1) a domingo (0), horario local
+const getCurrentWeekRangeMondayStart = (today = new Date()): { start: string; end: string } => {
   const d = new Date(today.getFullYear(), today.getMonth(), today.getDate()) // 00:00 local
-  const diffToMonday = (d.getDay() + 6) % 7 // 0 = lunes, 6 = domingo
-  const thisMonday = new Date(d)
-  thisMonday.setDate(d.getDate() - diffToMonday)
+  const diffToMonday = (d.getDay() + 6) % 7 // 0 si es lunes, 6 si es domingo
+  const monday = new Date(d)
+  monday.setDate(d.getDate() - diffToMonday)
 
-  const lastMonday = new Date(thisMonday)
-  lastMonday.setDate(thisMonday.getDate() - 7)
-  const lastSunday = new Date(lastMonday)
-  lastSunday.setDate(lastMonday.getDate() + 6)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
 
-  return { start: toYMD(lastMonday), end: toYMD(lastSunday) }
+  return { start: toYMD(monday), end: toYMD(sunday) }
 }
 
 const getDayNameEs = (date: Date): string =>
@@ -44,17 +42,21 @@ const getDayNameEs = (date: Date): string =>
     .format(date)
     .replace(/^\w/u, (c) => c.toUpperCase())
 
-// De "1970-01-01T07:22:19.000Z" a "07:22" (evitamos TZ tomando la parte HH:MM)
-const isoTimeToHHMM = (iso?: string | null): string => {
-  if (!iso || typeof iso !== 'string' || iso.length < 16) return ''
-  return iso.slice(11, 16)
+// ISO → HH:MM en HORA LOCAL
+const isoToLocalHHMM = (iso?: string | null): string => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
 }
 
-/** ---------- API v2: asistencia por rango (última semana completa) ---------- */
+/** ---------- API v2: asistencia por rango (semana actual Lun→Dom) ---------- */
 export const getWeeklyAttendance = async (): Promise<AttendanceDay[]> => {
-  const { start, end } = getLastWeekRange()
+  const { start, end } = getCurrentWeekRangeMondayStart()
 
-  // Pedimos la asistencia de la ÚLTIMA semana (lunes-domingo previos)
+  // Pedimos la asistencia de la SEMANA ACTUAL (lunes a domingo)
   const data = await fetchJson<{ ok: boolean; recordset?: any[] }>(
     `/v2/ASISTENCIA/${start}/${end}`
   )
@@ -67,19 +69,19 @@ export const getWeeklyAttendance = async (): Promise<AttendanceDay[]> => {
     const ymd = f ? f.slice(0, 10) : ''
     if (!ymd) continue
     byDate[ymd] = {
-      in: isoTimeToHHMM(r?.HORA_ENTRADA),
-      out: isoTimeToHHMM(r?.HORA_SALIDA),
+      in: isoToLocalHHMM(r?.HORA_ENTRADA), // hora LOCAL
+      out: isoToLocalHHMM(r?.HORA_SALIDA), // hora LOCAL
     }
   }
 
-  // Construimos lunes->domingo previo, rellenando vacíos
+  // Construimos lunes->domingo actual, rellenando vacíos
   const startDate = new Date(start)
   const result: AttendanceDay[] = []
   for (let i = 0; i < 7; i++) {
     const d = new Date(startDate)
     d.setDate(startDate.getDate() + i)
     const ymd = toYMD(d)
-    const dayName = getDayNameEs(d)
+    const dayName = getDayNameEs(d) // "Lunes", "Martes", ...
     result.push({
       day: dayName,
       checkIn: byDate[ymd]?.in ?? '',
@@ -90,7 +92,7 @@ export const getWeeklyAttendance = async (): Promise<AttendanceDay[]> => {
   return result
 }
 
-/** ---------- POST MARCAJE (se deja igual) ---------- */
+/** ---------- POST MARCAJE (legacy; no usado en v2 directo) ---------- */
 export const postMarcaje = async ({ tipo, fecha }: MarcajeRequest): Promise<void> => {
   const token = localStorage.getItem('TOKENLOG')
   if (!token) throw new Error('Token JWT no disponible')

@@ -4,7 +4,7 @@ import { getWeeklyAttendance } from '@services/attendanceService'
 import type { User } from '@services/authService'
 
 export interface AttendanceRecord {
-  day: string // "Lunes", "Martes", etc.
+  day: string // "Domingo", "Lunes", etc.
   checkIn?: string
   checkOut?: string
 }
@@ -36,6 +36,11 @@ const saveToStorage = (records: Record<string, AttendanceRecord[]>) => {
   }
 }
 
+const getDayNameEs = (date: Date): string =>
+  new Intl.DateTimeFormat('es-ES', { weekday: 'long' })
+    .format(date)
+    .replace(/^\w/u, (c) => c.toUpperCase())
+
 export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
   records: loadFromStorage(),
 
@@ -46,30 +51,27 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
     }
 
     try {
-      // Fuente única: API v2 (última semana lunes-domingo)
-      const apiData = await getWeeklyAttendance()
-      const localData = get().records[user.id] || []
+      // Datos de la SEMANA ACTUAL (Dom→Sáb) desde API v2
+      const apiWeek = await getWeeklyAttendance()
 
-      // Fusionar por día, dando prioridad a marcajes locales
-      const merged = apiData.map(apiDay => {
-        const localDay = localData.find(ld => ld.day === apiDay.day)
+      // Solo preservamos el marcaje LOCAL de HOY (si existe) para no perder la inmediatez
+      const localWeek = get().records[user.id] || []
+      const todayName = getDayNameEs(new Date())
+      const localToday = localWeek.find(d => d.day === todayName)
+
+      const merged = apiWeek.map(apiDay => {
+        if (apiDay.day !== todayName || !localToday) return apiDay
+        // si hoy tiene marcaje local, priorizarlo sobre el valor de API
         return {
           day: apiDay.day,
-          checkIn: localDay?.checkIn || apiDay.checkIn || undefined,
-          checkOut: localDay?.checkOut || apiDay.checkOut || undefined,
+          checkIn: localToday.checkIn ?? apiDay.checkIn,
+          checkOut: localToday.checkOut ?? apiDay.checkOut,
         }
       })
 
-      // Agregar días locales que no lleguen desde API (raro, pero preservamos)
-      const extraLocalDays = localData.filter(ld =>
-        !merged.some(md => md.day === ld.day)
-      )
-
-      const finalWeek = [...merged, ...extraLocalDays]
-
       const newRecords = {
         ...get().records,
-        [user.id]: finalWeek,
+        [user.id]: merged, // ⬅️ Reemplazamos la semana. NO arrastramos datos de otras semanas.
       }
 
       set({ records: newRecords })
@@ -84,15 +86,10 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
     const updated = current.map((d) =>
       d.day === day ? { ...d, checkIn: time } : d
     )
-
     const exists = current.some((d) => d.day === day)
     const newWeek = exists ? updated : [...current, { day, checkIn: time }]
 
-    const newRecords = {
-      ...get().records,
-      [userId]: newWeek,
-    }
-
+    const newRecords = { ...get().records, [userId]: newWeek }
     set({ records: newRecords })
     saveToStorage(newRecords)
   },
@@ -102,15 +99,10 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
     const updated = current.map((d) =>
       d.day === day ? { ...d, checkOut: time } : d
     )
-
     const exists = current.some((d) => d.day === day)
     const newWeek = exists ? updated : [...current, { day, checkOut: time }]
 
-    const newRecords = {
-      ...get().records,
-      [userId]: newWeek,
-    }
-
+    const newRecords = { ...get().records, [userId]: newWeek }
     set({ records: newRecords })
     saveToStorage(newRecords)
   },
